@@ -165,3 +165,86 @@ ordem obrigatória de aplicação.
 É uma troca consciente: perde-se a garantia do banco, ganha-se modularidade — e ganha-se uma
 mensagem de erro decente em vez de uma violação de constraint. Essa mesma troca aparece no projeto
 oficial e é o tipo de decisão que precisa estar escrita, senão parece esquecimento.
+
+---
+
+## D-009 — Cliente vira cadastro, e a venda aponta para ele
+
+**Data:** 2026-08-12
+**Status:** Aceita
+**Issue:** #12
+
+> **Sobre a numeração:** o número D-008 está reservado à decisão de estoque, no PR #11, que ainda
+> não foi mergeado. Usar D-009 aqui evita que as duas decisões colidam no mesmo número quando os
+> dois PRs entrarem. Um buraco na sequência é inofensivo; dois D-008 diferentes, não.
+
+O campo `Cliente` da venda era texto livre. `Venda.ClienteId` passa a apontar para um cadastro de
+clientes, em `Cadastros`.
+
+O problema que isso resolve: "Padaria Central", "padaria central" e "Padaria Central LTDA" eram
+três clientes distintos, e nada podia ser agrupado por cliente.
+
+### As decisões
+
+**A. Quais campos o cliente tem** → `Codigo`, `Nome`, `Documento`, `Telefone`, `Email`, `Ativo`,
+`DataCadastro`.
+
+Documento, telefone e e-mail são **opcionais**. O documento é **único quando informado** — é o que
+impede o cadastro duplicado que motivou a issue. No banco isso é um índice único **filtrado**
+(`WHERE [Documento] IS NOT NULL`): sem o filtro, o SQL Server aceitaria apenas um cliente sem
+documento.
+
+**Limitação assumida: o CPF/CNPJ não tem o dígito verificador validado** — só a quantidade de
+dígitos (11 ou 14). Validar DV é regra com muitos casos de borda e não é o foco do projeto. Existe
+um teste (`Documento_invalido_no_digito_verificador_e_aceito`) que **documenta** essa decisão: se
+alguém implementar a validação, o teste fica vermelho e a conversa acontece no PR.
+
+O e-mail é verificado de forma simples: arroba no meio, ponto no domínio, sem espaços. Consequência
+assumida: endereços de intranet sem ponto (`fulano@servidor`) são recusados — num cadastro de
+clientes isso quase sempre é erro de digitação.
+
+**B. O que fazer com as vendas que já existiam** → um cliente genérico.
+
+A migration cria o **"Cliente não identificado"**, com um `Id` fixo
+(`Vendas.Shared.ClientesConhecidos.NaoIdentificado`), e aponta todas as vendas existentes para ele.
+
+O nome que estava digitado **não se perde**: vai para a observação da venda, como
+`Cliente original: Mercado Central`.
+
+O `Id` fixo existe por um motivo concreto: a migration de `Movimentos` precisa apontar para um
+registro criado pela migration de `Cadastros`, e são dois `DbContext` diferentes. Um id constante,
+declarado em `Vendas.Shared`, é a única forma de ligá-las sem uma consultar a tabela da outra.
+
+**C. A venda guarda só o `ClienteId`** — não guarda o nome do momento da venda.
+
+Consequência: **renomear um cliente renomeia em todo o histórico**. Um ERP de verdade guardaria um
+*snapshot* do nome, porque a nota fiscal precisa refletir quem era o cliente naquela data. Aqui não
+há nota fiscal, documento não se edita (D-004) e a coluna a mais confundiria mais do que ajudaria.
+
+**D. O código do cliente é gerado pelo banco**, por `SEQUENCE` (`SeqCliente`), como o número da
+compra e da venda. O usuário não digita e não altera. Diferente de `Produto`, cujo código é
+digitado — ali o código costuma vir do fornecedor ou do setor, aqui não vem de lugar nenhum.
+
+**E. Cliente inativo não recebe venda.** Mesmo comportamento de produto inativo: a tela não oferece,
+e o backend recusa com 422 mesmo que alguém chame a API direto.
+
+**F. O contrato da API mudou.** `POST /api/v1/vendas` recebia `"cliente": "texto"` e passa a receber
+`"clienteId": "guid"`. As respostas trazem `clienteId`, `clienteCodigo` e `clienteNome`.
+
+É *breaking change*, e foi aceito porque o único consumidor é o frontend deste repositório, alterado
+no mesmo PR.
+
+### Como Movimentos enxerga o cliente
+
+Pelo contrato `IConsultaClientes`, em `Vendas.Shared` — implementado por `Cadastros`, injetado em
+`Movimentos`. Mesmo padrão de `IConsultaProdutos`. Nenhum acesso ao `CadastrosDbContext`.
+
+O caminho inverso (impedir excluir cliente com vendas) usa `IConsultaMovimentos.ClienteUtilizadoAsync`,
+porque **não existe FK entre os módulos** ([D-007](#d-007--sem-chave-estrangeira-entre-módulos)).
+A issue #12 pedia "FK `RESTRICT`, igual a produto" — mas produto também não tem FK, e a garantia
+sempre esteve na camada Application.
+
+### Fora de escopo
+
+Cadastro de fornecedores (a compra continua com texto livre), importação por planilha, relatório
+por cliente, endereço, e qualquer campo fiscal.

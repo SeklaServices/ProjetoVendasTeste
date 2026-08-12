@@ -28,7 +28,10 @@ export interface VendaResumo {
   id: string;
   numero: number;
   data: string;
-  cliente: string;
+  clienteId: string;
+  /** Vêm resolvidos do cadastro a cada consulta — a venda guarda só o id. */
+  clienteCodigo: number;
+  clienteNome: string;
   valorTotal: number;
   quantidadeItens: number;
 }
@@ -90,7 +93,7 @@ export const vendasApi = {
 
   criar: (dados: {
     data: string;
-    cliente: string;
+    clienteId: string;
     observacao?: string | null;
     itens: ItemRequest[];
   }): Promise<{ id: string; numero: number }> =>

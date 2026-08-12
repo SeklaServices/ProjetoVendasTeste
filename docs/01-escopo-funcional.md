@@ -49,7 +49,27 @@ Cadastro simples, com CRUD completo (criar, listar, editar, excluir).
   sistema orienta a inativá-lo.
 - Preço de venda menor que o de custo é permitido, mas a tela exibe um aviso (não bloqueia).
 
-### 2.2 Compras (entrada)
+### 2.2 Cadastro de Clientes
+
+CRUD completo, como o de produtos. É o cliente da venda — a compra continua com fornecedor em texto
+livre.
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| Código | inteiro | **Gerado pelo sistema**, sequencial e único. Não é digitado nem editável. |
+| Nome | texto (até 120) | Obrigatório. |
+| CPF / CNPJ | texto (até 18) | Opcional. Aceita com ou sem pontuação — guardado só com dígitos. **Único quando informado.** 11 dígitos (CPF) ou 14 (CNPJ). |
+| Telefone | texto (até 20) | Opcional. |
+| E-mail | texto (até 120) | Opcional. Verificação simples de formato. |
+| Ativo | booleano | Padrão `true`. Cliente inativo não aparece na seleção de vendas. |
+| Data de cadastro | data/hora | Preenchida pelo sistema. |
+
+**Regras:**
+- Não é permitido excluir cliente que já tem vendas — o sistema orienta a inativá-lo.
+- **O dígito verificador do CPF/CNPJ não é validado** — apenas a quantidade de dígitos. Limitação
+  conhecida e deliberada (`07-decisoes.md` D-009).
+
+### 2.3 Compras (entrada)
 
 Registro de uma entrada de mercadoria. É um documento com cabeçalho e itens.
 
@@ -78,19 +98,19 @@ Registro de uma entrada de mercadoria. É um documento com cabeçalho e itens.
 - Compra **não pode ser editada** depois de salva — apenas excluída e refeita. (Decisão deliberada:
   reduz o escopo e evita discussão de versionamento de documento.)
 
-### 2.3 Vendas (saída)
+### 2.4 Vendas (saída)
 
 Estruturalmente idêntica à compra, com nomes e sugestões diferentes.
 
-**Cabeçalho:** Número (sequencial próprio), Data da venda (não futura), **Cliente** (texto livre,
-obrigatório), Observação, Valor total (calculado).
+**Cabeçalho:** Número (sequencial próprio), Data da venda (não futura), **Cliente** (selecionado do
+cadastro, obrigatório, precisa estar ativo), Observação, Valor total (calculado).
 
 **Itens:** Produto (ativo), Quantidade (> 0), Preço unitário (sugerido = **preço de venda** do
 produto), Subtotal calculado.
 
 **Regras:** mesmas da compra — mínimo um item, sem edição após salvar.
 
-### 2.4 Resumo (tela inicial)
+### 2.5 Resumo (tela inicial)
 
 Painel simples, somente leitura, com:
 
@@ -111,7 +131,7 @@ Esta lista é normativa. Nada aqui entra sem uma decisão explícita registrada.
 | Fora de escopo | Por quê |
 |---|---|
 | **Controle de estoque** | Decisão do responsável. Não há saldo, não há validação de disponibilidade, não há movimento de estoque. Uma venda de 100 unidades de um produto que nunca foi comprado é **válida**. |
-| Cadastro de clientes / fornecedores | Texto livre resolve. Cadastro é um bom exercício futuro (ver `06-exercicios-git.md`). |
+| Cadastro de **fornecedores** | A compra continua com texto livre. O cadastro de **clientes** passou a existir (D-009). |
 | Autenticação, login, permissões | Ambiente local, sem dados reais. Vira exercício opcional. |
 | Multi-empresa / multi-filial | Complexidade do sistema real, desnecessária aqui. |
 | Fiscal (NF-e, impostos), financeiro (contas a pagar/receber) | Fora do propósito. |
@@ -132,6 +152,8 @@ Não há hierarquia, aprovação ou segregação de acesso.
 
 | Termo | Significado neste projeto |
 |---|---|
+| **Cliente** | Cadastro de quem compra. Código sequencial gerado pelo sistema. A venda aponta para ele. |
+| **Cliente não identificado** | Cliente genérico criado pela migration, que recebeu as vendas anteriores ao cadastro. |
 | **Compra** | Documento de entrada de mercadoria. Não afeta estoque (não existe estoque). |
 | **Venda** | Documento de saída de mercadoria. Não afeta estoque. |
 | **Movimento** | Termo guarda-chuva para compra ou venda. Nome do módulo que contém as duas. |

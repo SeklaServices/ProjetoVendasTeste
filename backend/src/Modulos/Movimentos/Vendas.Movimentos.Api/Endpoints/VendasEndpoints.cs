@@ -34,7 +34,7 @@ public static class VendasEndpoints
                 .ToList();
 
             var (id, numero) = await handler.HandleAsync(
-                new CriarVendaCommand(req.Data, req.Cliente, req.Observacao, itens), ct);
+                new CriarVendaCommand(req.Data, req.ClienteId, req.Observacao, itens), ct);
 
             return Results.Created($"/api/v1/vendas/{id}", new { id, numero });
         });
@@ -51,6 +51,7 @@ public static class VendasEndpoints
 
     private sealed record ItemReq(Guid ProdutoId, decimal Quantidade, decimal PrecoUnitario);
 
+    /// <param name="ClienteId">Id do cliente cadastrado. O nome não trafega mais — ver D-009.</param>
     private sealed record CriarVendaReq(
-        DateOnly Data, string Cliente, string? Observacao, IReadOnlyList<ItemReq>? Itens);
+        DateOnly Data, Guid ClienteId, string? Observacao, IReadOnlyList<ItemReq>? Itens);
 }

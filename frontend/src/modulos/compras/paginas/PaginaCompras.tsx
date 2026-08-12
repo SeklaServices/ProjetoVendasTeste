@@ -114,6 +114,7 @@ export default function PaginaCompras() {
         salvando={criar.isPending}
         titulo="Nova compra"
         rotuloParceiro="Fornecedor"
+        tipoParceiro="texto"
         precoSugerido="precoCusto"
         aoCancelar={() => setModalAberto(false)}
         aoSalvar={({ data, parceiro, observacao, itens }) =>

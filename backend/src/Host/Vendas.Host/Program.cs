@@ -61,6 +61,7 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/health", () => Results.Ok(new { situacao = "ok" })).WithTags("Infraestrutura");
 
 app.MapProdutosEndpoints();
+app.MapClientesEndpoints();
 app.MapComprasEndpoints();
 app.MapVendasEndpoints();
 app.MapResumoEndpoints();

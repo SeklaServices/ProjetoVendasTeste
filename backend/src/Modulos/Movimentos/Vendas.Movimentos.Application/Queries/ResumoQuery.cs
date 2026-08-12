@@ -9,7 +9,8 @@ public sealed record ResumoQuery(DateOnly? DataInicial, DateOnly? DataFinal);
 public sealed class ResumoQueryHandler(
     ICompraRepositorio compras,
     IVendaRepositorio vendas,
-    IConsultaProdutos consultaProdutos)
+    IConsultaProdutos consultaProdutos,
+    IConsultaClientes consultaClientes)
 {
     private const int QuantidadeUltimosMovimentos = 5;
 
@@ -18,6 +19,7 @@ public sealed class ResumoQueryHandler(
         var listaCompras = await compras.ListarAsync(consulta.DataInicial, consulta.DataFinal, ct);
         var listaVendas = await vendas.ListarAsync(consulta.DataInicial, consulta.DataFinal, ct);
         var (totalProdutos, produtosAtivos) = await consultaProdutos.ContarAsync(ct);
+        var clientes = await MapeadorDeVenda.ObterClientesAsync(consultaClientes, listaVendas, ct);
 
         var totalComprado = listaCompras.Sum(c => c.ValorTotal);
         var totalVendido = listaVendas.Sum(v => v.ValorTotal);
@@ -38,7 +40,7 @@ public sealed class ResumoQueryHandler(
             UltimasVendas: listaVendas
                 .OrderByDescending(v => v.Numero)
                 .Take(QuantidadeUltimosMovimentos)
-                .Select(ListarVendasQueryHandler.MapearResumo)
+                .Select(v => MapeadorDeVenda.MapearResumo(v, clientes))
                 .ToList());
     }
 }

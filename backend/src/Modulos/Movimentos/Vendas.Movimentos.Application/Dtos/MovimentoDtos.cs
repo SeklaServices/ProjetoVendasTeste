@@ -4,8 +4,19 @@ namespace Vendas.Movimentos.Application.Dtos;
 public sealed record CompraResumoDto(
     Guid Id, int Numero, DateOnly Data, string Fornecedor, decimal ValorTotal, int QuantidadeItens);
 
+/// <summary>
+/// O nome do cliente vem resolvido do cadastro a cada consulta — a venda guarda só o id (D-009).
+/// Se o cliente tiver sido excluído, algo que a regra de negócio impede, o nome cai no fallback.
+/// </summary>
 public sealed record VendaResumoDto(
-    Guid Id, int Numero, DateOnly Data, string Cliente, decimal ValorTotal, int QuantidadeItens);
+    Guid Id,
+    int Numero,
+    DateOnly Data,
+    Guid ClienteId,
+    int ClienteCodigo,
+    string ClienteNome,
+    decimal ValorTotal,
+    int QuantidadeItens);
 
 /// <summary>Item já com os dados do produto resolvidos, para a tela não precisar de outra chamada.</summary>
 public sealed record ItemDto(
@@ -32,7 +43,9 @@ public sealed record VendaDetalheDto(
     Guid Id,
     int Numero,
     DateOnly Data,
-    string Cliente,
+    Guid ClienteId,
+    int ClienteCodigo,
+    string ClienteNome,
     string? Observacao,
     decimal ValorTotal,
     DateTime DataCriacao,

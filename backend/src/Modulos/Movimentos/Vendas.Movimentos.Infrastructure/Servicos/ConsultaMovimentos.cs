@@ -13,4 +13,7 @@ public sealed class ConsultaMovimentos(MovimentosDbContext contexto) : IConsulta
     public async Task<bool> ProdutoUtilizadoAsync(Guid produtoId, CancellationToken ct)
         => await contexto.Compras.AnyAsync(c => c.Itens.Any(i => i.ProdutoId == produtoId), ct)
         || await contexto.Vendas.AnyAsync(v => v.Itens.Any(i => i.ProdutoId == produtoId), ct);
+
+    public Task<bool> ClienteUtilizadoAsync(Guid clienteId, CancellationToken ct)
+        => contexto.Vendas.AnyAsync(v => v.ClienteId == clienteId, ct);
 }

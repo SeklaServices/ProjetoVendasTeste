@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vendas.Movimentos.Infrastructure.Persistencia;
 
@@ -11,9 +12,11 @@ using Vendas.Movimentos.Infrastructure.Persistencia;
 namespace Vendas.Movimentos.Infrastructure.Persistencia.Migrations
 {
     [DbContext(typeof(MovimentosDbContext))]
-    partial class MovimentosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812205704_Movimentos_VendaClienteId")]
+    partial class Movimentos_VendaClienteId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

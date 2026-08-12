@@ -52,7 +52,11 @@ export default function PaginaVendas() {
   const colunas: ColumnsType<VendaResumo> = [
     { title: 'Nº', dataIndex: 'numero', width: 90 },
     { title: 'Data', dataIndex: 'data', width: 130, render: (iso: string) => formatarData(iso) },
-    { title: 'Cliente', dataIndex: 'cliente' },
+    {
+      title: 'Cliente',
+      key: 'cliente',
+      render: (_, venda) => `${venda.clienteCodigo} — ${venda.clienteNome}`,
+    },
     { title: 'Itens', dataIndex: 'quantidadeItens', width: 90, align: 'right' },
     {
       title: 'Valor total',
@@ -114,10 +118,12 @@ export default function PaginaVendas() {
         salvando={criar.isPending}
         titulo="Nova venda"
         rotuloParceiro="Cliente"
+        tipoParceiro="cliente"
         precoSugerido="precoVenda"
         aoCancelar={() => setModalAberto(false)}
         aoSalvar={({ data, parceiro, observacao, itens }) =>
-          criar.mutate({ data, cliente: parceiro, observacao, itens })
+          // `parceiro` traz o id do cliente selecionado — ver ModalDocumento.
+          criar.mutate({ data, clienteId: parceiro, observacao, itens })
         }
       />
     </Card>
