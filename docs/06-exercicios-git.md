@@ -20,7 +20,7 @@ compartilhada.
 Issue: *"Adicionar campo Observação ao cadastro de produto"*
 
 1. Criar issue no GitHub
-2. `git switch develop && git pull`
+2. `git switch develop; git pull`
 3. `git switch -c feature/{n}-observacao-produto`
 4. Backend: campo na entidade, migration, DTO, endpoint
 5. Frontend: campo no modal e coluna na tabela
@@ -54,7 +54,7 @@ um `[bloqueante]` ou `[dúvida]`, e um `[elogio]`.
 As duas mexem no `Roteador.tsx`, no menu lateral e no `.slnx`. A primeira que fizer merge ganha; a
 segunda **vai ter conflito** e precisa resolver.
 
-1. A segunda pessoa: `git fetch origin && git rebase origin/develop`
+1. A segunda pessoa: `git fetch origin; git rebase origin/develop`
 2. Resolver cada conflito, entendendo o que cada lado queria
 3. `git rebase --continue`, `git push --force-with-lease`
 4. Conferir que o PR agora mostra só as mudanças dela
@@ -92,7 +92,7 @@ descritos. É aqui que a regra de commit boa se paga.
 último item.
 
 1. Reproduzir (e escrever o teste que falha **antes** de corrigir)
-2. `git switch main && git pull && git switch -c hotfix/{n}-total-ignora-ultimo-item`
+2. `git switch main; git pull; git switch -c hotfix/{n}-total-ignora-ultimo-item`
 3. Corrigir, PR para `main`, merge commit
 4. Tag `v1.0.1`
 5. **Trazer para `develop`** — a etapa que todo mundo esquece

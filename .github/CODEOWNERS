@@ -1,0 +1,10 @@
+# Donos do código: quem é pedido automaticamente como revisor em PRs que tocam estes caminhos.
+#
+# Enquanto a equipe é pequena, tudo tem o mesmo dono. Conforme as pessoas se especializarem,
+# vale dividir por área (backend / frontend / docs) para o review certo cair na pessoa certa.
+#
+# Para tornar a revisão do dono OBRIGATÓRIA, ligue "require_code_owner_review" nos rulesets
+# (.github/rulesets/*.json). Hoje está desligado: com poucas pessoas, tornaria o merge dependente
+# de uma única pessoa estar disponível.
+
+*  @SeklaServices/desenvolvedores

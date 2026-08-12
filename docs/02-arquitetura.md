@@ -142,7 +142,7 @@ Compras                              Vendas
 ComprasItens                         VendasItens
   Id            uniqueidentifier PK    Id            uniqueidentifier PK
   CompraId      FK → Compras (cascade) VendaId       FK → Vendas (cascade)
-  ProdutoId     FK → Produtos (restrict) ProdutoId   FK → Produtos (restrict)
+  ProdutoId     indexado (sem FK)      ProdutoId     indexado (sem FK)
   Quantidade    decimal(18,4)          Quantidade    decimal(18,4)
   PrecoUnitario decimal(18,4)          PrecoUnitario decimal(18,4)
   Subtotal      decimal(18,4)          Subtotal      decimal(18,4)
@@ -151,8 +151,11 @@ ComprasItens                         VendasItens
 **Decisões:**
 - `Id` é `Guid` (gerado na aplicação) — igual ao projeto real.
 - `Numero` vem de uma `SEQUENCE` do SQL Server (`SeqCompra`, `SeqVenda`) — igual ao projeto real.
-- FK de item → produto é `RESTRICT`: é isso que impede excluir produto já usado.
 - FK de item → documento é `CASCADE`: excluir a compra apaga seus itens.
+- Item → produto **não tem FK**, só índice em `ProdutoId`. `Produtos` pertence ao DbContext de
+  outro módulo, e uma FK entre migrations de módulos diferentes as tornaria dependentes uma da
+  outra. A integridade fica na camada Application (`ExcluirProdutoCommandHandler` e a validação
+  dos itens). Ver `07-decisoes.md` D-007.
 - `ValorTotal` e `Subtotal` são **persistidos**, mas sempre calculados pelo domínio. A API rejeita
   qualquer valor enviado pelo cliente para esses campos.
 
