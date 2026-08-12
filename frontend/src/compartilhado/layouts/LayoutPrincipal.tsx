@@ -11,6 +11,7 @@ const { Header, Content, Sider } = Layout;
 const itens: MenuProps['items'] = [
   { key: '/', label: <Link to="/">Resumo</Link> },
   { key: '/produtos', label: <Link to="/produtos">Produtos</Link> },
+  { key: '/clientes', label: <Link to="/clientes">Clientes</Link> },
   { key: '/compras', label: <Link to="/compras">Compras</Link> },
   { key: '/vendas', label: <Link to="/vendas">Vendas</Link> },
 ];

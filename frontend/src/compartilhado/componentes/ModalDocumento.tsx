@@ -6,6 +6,8 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { produtosApi } from '../../modulos/produtos/servicos/produtosApi';
 import type { Produto } from '../../modulos/produtos/servicos/produtosApi';
+import { clientesApi } from '../../modulos/clientes/servicos/clientesApi';
+import type { Cliente } from '../../modulos/clientes/servicos/clientesApi';
 import type { ItemRequest } from '../../modulos/movimentos/servicos/movimentosApi';
 import { formatarMoeda, formatarQuantidade } from '../utils/formatadores';
 
@@ -15,17 +17,23 @@ import { formatarMoeda, formatarQuantidade } from '../utils/formatadores';
  * Compra e venda são a mesma tela com rótulos e sugestão de preço diferentes — por isso um
  * componente só, parametrizado. No BACKEND as duas estão duplicadas de propósito; aqui compartilhar
  * é a escolha certa porque não há regra de negócio envolvida, só apresentação.
+ *
+ * O parceiro é o ponto onde as duas divergem hoje: a venda escolhe um CLIENTE CADASTRADO, e a
+ * compra ainda digita o fornecedor como texto livre. Daí o `tipoParceiro`.
  */
 interface Props {
   aberto: boolean;
   salvando: boolean;
   titulo: string;
   rotuloParceiro: string;
+  /** `texto` = campo livre (fornecedor). `cliente` = seleção do cadastro de clientes. */
+  tipoParceiro: 'texto' | 'cliente';
   /** De onde sai o preço sugerido ao escolher o produto. */
   precoSugerido: 'precoCusto' | 'precoVenda';
   aoCancelar: () => void;
   aoSalvar: (dados: {
     data: string;
+    /** Nome digitado quando `tipoParceiro` é `texto`; id do cliente quando é `cliente`. */
     parceiro: string;
     observacao: string | null;
     itens: ItemRequest[];
@@ -49,6 +57,7 @@ export default function ModalDocumento({
   salvando,
   titulo,
   rotuloParceiro,
+  tipoParceiro,
   precoSugerido,
   aoCancelar,
   aoSalvar,
@@ -66,6 +75,13 @@ export default function ModalDocumento({
     queryKey: ['produtos', 'ativos'],
     queryFn: () => produtosApi.listar(undefined, true),
     enabled: aberto,
+  });
+
+  // Mesma lógica para clientes — e só busca quando a tela realmente usa o cadastro.
+  const { data: clientes = [] } = useQuery({
+    queryKey: ['clientes', 'ativos'],
+    queryFn: () => clientesApi.listar(undefined, true),
+    enabled: aberto && tipoParceiro === 'cliente',
   });
 
   useEffect(() => {
@@ -210,9 +226,26 @@ export default function ModalDocumento({
             <Form.Item
               name="parceiro"
               label={rotuloParceiro}
-              rules={[{ required: true, message: `Informe o ${rotuloParceiro.toLowerCase()}.` }, { max: 120 }]}
+              rules={[
+                { required: true, message: `Informe o ${rotuloParceiro.toLowerCase()}.` },
+                ...(tipoParceiro === 'texto' ? [{ max: 120 }] : []),
+              ]}
             >
-              <Input />
+              {tipoParceiro === 'cliente' ? (
+                <Select
+                  showSearch
+                  placeholder="Selecione o cliente"
+                  optionFilterProp="label"
+                  // Cliente inativo é recusado pelo backend, então nem entra na lista.
+                  options={clientes.map((c: Cliente) => ({
+                    value: c.id,
+                    label: `${c.codigo} — ${c.nome}`,
+                  }))}
+                  notFoundContent="Nenhum cliente ativo cadastrado."
+                />
+              ) : (
+                <Input />
+              )}
             </Form.Item>
           </Col>
           <Col span={8}>

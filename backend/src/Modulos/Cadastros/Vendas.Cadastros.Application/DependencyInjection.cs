@@ -14,6 +14,13 @@ public static class DependencyInjection
         servicos.AddScoped<ExcluirProdutoCommandHandler>();
         servicos.AddScoped<ListarProdutosQueryHandler>();
         servicos.AddScoped<ObterProdutoQueryHandler>();
+
+        servicos.AddScoped<CriarClienteCommandHandler>();
+        servicos.AddScoped<AtualizarClienteCommandHandler>();
+        servicos.AddScoped<ExcluirClienteCommandHandler>();
+        servicos.AddScoped<ListarClientesQueryHandler>();
+        servicos.AddScoped<ObterClienteQueryHandler>();
+
         return servicos;
     }
 }

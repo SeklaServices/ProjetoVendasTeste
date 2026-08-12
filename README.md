@@ -163,12 +163,13 @@ está publicado, e para conseguir voltar a ele.
 | Módulo | O que faz |
 |---|---|
 | **Produtos** | Cadastro com código único, nome, unidade, preço de custo e de venda |
+| **Clientes** | Cadastro com código sequencial, nome, CPF/CNPJ, telefone e e-mail |
 | **Compras** | Entrada de mercadoria — cabeçalho (data, fornecedor) + itens (produto, quantidade, preço) |
-| **Vendas** | Saída de mercadoria — mesma estrutura, com cliente no lugar de fornecedor |
+| **Vendas** | Saída de mercadoria — mesma estrutura, com cliente selecionado do cadastro |
 | **Resumo** | Totais de compras e vendas no período, e as últimas movimentações |
 
-**O que ele deliberadamente NÃO faz:** controle de estoque, cadastro de clientes/fornecedores,
-login, fiscal, financeiro, edição de documento já salvo.
+**O que ele deliberadamente NÃO faz:** controle de estoque, cadastro de fornecedores (a compra usa
+texto livre), login, fiscal, financeiro, edição de documento já salvo.
 
 Isso não é esquecimento — é decisão registrada em [docs/07-decisoes.md](docs/07-decisoes.md).
 **Vender 100 unidades de um produto que nunca foi comprado é válido neste sistema**, porque não

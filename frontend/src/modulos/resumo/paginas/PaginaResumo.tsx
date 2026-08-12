@@ -35,7 +35,7 @@ export default function PaginaResumo() {
   const colunasVendas: ColumnsType<VendaResumo> = [
     { title: 'Nº', dataIndex: 'numero', width: 80 },
     { title: 'Data', dataIndex: 'data', width: 120, render: (iso: string) => formatarData(iso) },
-    { title: 'Cliente', dataIndex: 'cliente' },
+    { title: 'Cliente', dataIndex: 'clienteNome' },
     {
       title: 'Valor',
       dataIndex: 'valorTotal',

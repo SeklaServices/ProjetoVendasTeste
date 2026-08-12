@@ -18,8 +18,12 @@ public sealed class VendaConfiguracao : IEntityTypeConfiguration<Venda>
         construtor.HasIndex(v => v.Numero).IsUnique();
 
         construtor.Property(v => v.Data).HasColumnType("date").IsRequired();
-        construtor.Property(v => v.Cliente).HasMaxLength(Venda.TamanhoMaximoParceiro).IsRequired();
+        construtor.Property(v => v.ClienteId).IsRequired();
         construtor.Property(v => v.Observacao).HasMaxLength(Venda.TamanhoMaximoObservacao);
+
+        // Índice sem FK: Clientes pertence ao DbContext de Cadastros (D-007). O índice serve à
+        // consulta que impede excluir cliente já usado.
+        construtor.HasIndex(v => v.ClienteId);
         construtor.Property(v => v.ValorTotal).HasPrecision(18, 4);
         construtor.Property(v => v.DataCriacao).IsRequired();
 
