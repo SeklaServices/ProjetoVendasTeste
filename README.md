@@ -8,6 +8,9 @@ code review, resolução de conflitos, releases e hotfixes.
 
 > Se você chegou aqui para entender **como trabalhamos**, leia a seção
 > [Como funciona o fluxo de trabalho](#como-funciona-o-fluxo-de-trabalho). É a parte que importa.
+>
+> Não tem familiaridade com git na linha de comando? O mesmo fluxo, feito por botões no GitHub e no
+> VS Code, está em [docs/09-fluxo-sem-linha-de-comando.md](docs/09-fluxo-sem-linha-de-comando.md).
 
 ---
 
@@ -370,3 +373,4 @@ em algum projeto.
 | 6 | [docs/06-exercicios-git.md](docs/06-exercicios-git.md) | 11 exercícios práticos, em 4 níveis |
 | 7 | [docs/07-decisoes.md](docs/07-decisoes.md) | Decisões tomadas e o porquê de cada uma |
 | 8 | [docs/08-protecao-do-repositorio.md](docs/08-protecao-do-repositorio.md) | Como o GitHub aplica as regras sozinho |
+| 9 | [docs/09-fluxo-sem-linha-de-comando.md](docs/09-fluxo-sem-linha-de-comando.md) | **O mesmo fluxo, por botões** — para quem está começando |
