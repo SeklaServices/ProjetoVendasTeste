@@ -56,9 +56,8 @@ Cada desenvolvedor tem **seu próprio banco local**. Nada é compartilhado.
 `backend/src/Host/Vendas.Host/appsettings.Development.json` **está no `.gitignore`** — é o arquivo
 onde cada um coloca a sua conexão. O repositório versiona apenas o exemplo:
 
-```bash
-cp backend/src/Host/Vendas.Host/appsettings.Development.example.json \
-   backend/src/Host/Vendas.Host/appsettings.Development.json
+```powershell
+Copy-Item backend\src\Host\Vendas.Host\appsettings.Development.example.json backend\src\Host\Vendas.Host\appsettings.Development.json
 ```
 
 Conteúdo (ajuste o `Server` para a sua instância):
@@ -66,12 +65,22 @@ Conteúdo (ajuste o `Server` para a sua instância):
 ```json
 {
   "ConnectionStrings": {
-    "Padrao": "Server=localhost;Database=ProjetoVendasTeste;Trusted_Connection=True;TrustServerCertificate=True"
+    "Padrao": "Server=localhost\\SQLEXPRESS;Database=ProjetoVendasTeste;Trusted_Connection=True;TrustServerCertificate=True"
   }
 }
 ```
 
-Para LocalDB: `Server=(localdb)\\MSSQLLocalDB;Database=ProjetoVendasTeste;Trusted_Connection=True`.
+Descubra a sua instância com:
+
+```powershell
+Get-Service | Where-Object { $_.Name -like 'MSSQL*' } | Select-Object Name, Status
+```
+
+| Serviço | `Server=` |
+|---|---|
+| `MSSQL$SQLEXPRESS` | `localhost\SQLEXPRESS` |
+| `MSSQLSERVER` | `localhost` |
+| LocalDB (não aparece como serviço) | `(localdb)\MSSQLLocalDB` |
 
 > **Por que isso importa para o treino de git:** configuração local nunca vai para o repositório.
 > Se alguém commitar `appsettings.Development.json` com a conexão da própria máquina, o PR quebra
@@ -79,13 +88,25 @@ Para LocalDB: `Server=(localdb)\\MSSQLLocalDB;Database=ProjetoVendasTeste;Truste
 
 ### 3.2 Criar o banco
 
+Na primeira execução, **o próprio backend aplica as migrations** e cria o banco. Basta rodar a API
+(passo 4). Se preferir criar antes, ou se precisar recriar:
+
 ```bash
 cd backend
-dotnet ef database update --project src/Modulos/Cadastros/Vendas.Cadastros.Infrastructure --startup-project src/Host/Vendas.Host
-dotnet ef database update --project src/Modulos/Movimentos/Vendas.Movimentos.Infrastructure --startup-project src/Host/Vendas.Host
+dotnet ef database update --project src/Modulos/Cadastros/Vendas.Cadastros.Infrastructure
+dotnet ef database update --project src/Modulos/Movimentos/Vendas.Movimentos.Infrastructure
 ```
 
-Duas migrations separadas porque são dois `DbContext` — um por módulo.
+Dois comandos porque são dois `DbContext` — um por módulo, cada um com sua tabela de histórico
+(`__EFMigrationsHistory_Cadastros` e `__EFMigrationsHistory_Movimentos`) no mesmo banco.
+
+O `dotnet ef` não usa o `appsettings.Development.json`: ele usa as factories de design-time, que
+leem a variável de ambiente `VENDAS_CONEXAO` e caem no padrão `Server=localhost` se ela não
+existir. Se a sua instância for outra:
+
+```powershell
+$env:VENDAS_CONEXAO = "Server=localhost\SQLEXPRESS;Database=ProjetoVendasTeste;Trusted_Connection=True;TrustServerCertificate=True"
+```
 
 ---
 
@@ -98,7 +119,8 @@ cd backend
 dotnet run --project src/Host/Vendas.Host
 ```
 
-API em `https://localhost:7001`, Swagger em `https://localhost:7001/swagger`.
+API em `http://localhost:5080`. Documentação interativa em `http://localhost:5080/scalar` (só em
+Development). Teste rápido: `http://localhost:5080/health` deve responder `{"situacao":"ok"}`.
 
 ### Frontend
 
@@ -108,11 +130,11 @@ npm install
 npm run dev
 ```
 
-Aplicação em `http://localhost:5173`. A URL da API vem de `frontend/.env.local` (também
-gitignorado):
+Aplicação em `http://localhost:5173`. A URL padrão da API já aponta para `localhost:5080`; para
+mudar, copie `frontend/.env.example` para `frontend/.env.local` (gitignorado) e ajuste:
 
 ```
-VITE_API_URL=https://localhost:7001/api/v1
+VITE_API_URL=http://localhost:5080/api/v1
 ```
 
 ---
@@ -121,10 +143,17 @@ VITE_API_URL=https://localhost:7001/api/v1
 
 O CI vai rodar exatamente estes comandos. Rodar antes economiza um ciclo de PR vermelho:
 
-```bash
-cd backend && dotnet build && dotnet test
-cd ../frontend && npm run type-check && npm run build
+```powershell
+cd backend; dotnet build; dotnet test
 ```
+
+```powershell
+cd frontend; npm run type-check; npm run build
+```
+
+> **Windows PowerShell 5.1 não aceita `&&`.** Use `;` para encadear comandos. Se você usa o
+> PowerShell 7+ (`pwsh`) ou o Git Bash, `&&` funciona — mas `;` funciona em todos, então é o que a
+> documentação usa.
 
 ---
 
@@ -132,6 +161,8 @@ cd ../frontend && npm run type-check && npm run build
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
+| `O token '&&' não é um separador de instruções válido` | Windows PowerShell 5.1 não suporta `&&` | Trocar por `;`, ou usar `pwsh` / Git Bash |
+| `ConnectionStrings:Padrao não configurada` | Falta o `appsettings.Development.json` | Copiar do `.example.json` (§3.1) |
 | `A network-related or instance-specific error` | Instância do SQL errada na conexão | Conferir `Server=` no `appsettings.Development.json` |
 | `The certificate chain was issued by an untrusted authority` | Falta `TrustServerCertificate=True` | Adicionar na string de conexão |
 | `dotnet ef` não encontrado | Tool não instalada | `dotnet tool install --global dotnet-ef` |

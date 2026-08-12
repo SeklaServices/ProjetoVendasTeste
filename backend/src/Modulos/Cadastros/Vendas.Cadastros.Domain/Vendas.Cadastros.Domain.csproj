@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Domain só depende do compartilhado. Nada de EF Core, nada de ASP.NET. Se alguém precisar
+       adicionar um pacote de infraestrutura aqui, a regra de dependência foi violada. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Compartilhado\Vendas.Shared\Vendas.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

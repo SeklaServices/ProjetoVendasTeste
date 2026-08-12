@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.10.0" />
+    <!-- NU1903: Microsoft.OpenApi 2.x (transitivo do AspNetCore.OpenApi) tem advisory conhecido
+         (GHSA-v5pm-xwqc-g5wc) e ainda não há versão 2.x corrigida. A 3.x não é compatível com o
+         source generator do ASP.NET Core 10 (erro CS0200). O aviso fica VISÍVEL de propósito —
+         suprimir alerta de segurança é pior que conviver com ele sabendo. A documentação da API só
+         é exposta em Development. Ver docs/07-decisoes.md D-006. -->
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modulos\Cadastros\Vendas.Cadastros.Api\Vendas.Cadastros.Api.csproj" />
+    <ProjectReference Include="..\..\Modulos\Cadastros\Vendas.Cadastros.Infrastructure\Vendas.Cadastros.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modulos\Movimentos\Vendas.Movimentos.Api\Vendas.Movimentos.Api.csproj" />
+    <ProjectReference Include="..\..\Modulos\Movimentos\Vendas.Movimentos.Infrastructure\Vendas.Movimentos.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

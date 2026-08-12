@@ -122,3 +122,46 @@ que **fica vermelho quando alguém quebra uma regra** — porque o CI vermelho b
 parte do que se está treinando. Testes de integração custariam mais setup do que ensinariam.
 
 No projeto oficial eles existem e são obrigatórios. Aqui, não.
+
+---
+
+## D-006 — Conviver com o aviso NU1903 do Microsoft.OpenApi
+
+**Data:** 2026-08-12
+**Status:** Aceita, com revisão pendente
+
+O build emite `NU1903`: `Microsoft.OpenApi` 2.x tem advisory conhecido
+([GHSA-v5pm-xwqc-g5wc](https://github.com/advisories/GHSA-v5pm-xwqc-g5wc)). O pacote entra
+transitivamente por `Microsoft.AspNetCore.OpenApi` 10.0.0, e ainda não há versão 2.x corrigida. A
+3.x foi testada e **não** compila com o source generator do ASP.NET Core 10 (`error CS0200`).
+
+**Decisão:** manter o aviso **visível**. Não usar `NoWarn` nem `NuGetAuditMode` para escondê-lo —
+suprimir alerta de segurança é pior que conviver com ele sabendo. A documentação da API (Scalar) só
+é exposta em `Development`, e o projeto não vai a produção.
+
+**Revisar quando:** sair uma 2.x corrigida, ou o ASP.NET Core passar a suportar a 3.x. É um bom
+primeiro PR de `chore(deps)` para alguém da equipe.
+
+---
+
+## D-007 — Sem chave estrangeira entre módulos
+
+**Data:** 2026-08-12
+**Status:** Aceita
+
+`ComprasItens.ProdutoId` e `VendasItens.ProdutoId` apontam para `Produtos`, mas **não têm FK** — só
+índice.
+
+**Motivo:** `Produtos` pertence ao `CadastrosDbContext` e os itens ao `MovimentosDbContext`. Uma FK
+entre eles obrigaria a migration de um módulo a conhecer a tabela do outro, o que quebraria a
+independência que a arquitetura inteira existe para manter — as duas migrations passariam a ter
+ordem obrigatória de aplicação.
+
+**Como a integridade é garantida sem a FK:**
+- Na criação: `ValidacaoProdutosDosItens` recusa item cujo produto não existe ou está inativo
+- Na exclusão: `ExcluirProdutoCommandHandler` consulta `IConsultaMovimentos` e recusa excluir
+  produto já usado
+
+É uma troca consciente: perde-se a garantia do banco, ganha-se modularidade — e ganha-se uma
+mensagem de erro decente em vez de uma violação de constraint. Essa mesma troca aparece no projeto
+oficial e é o tipo de decisão que precisa estar escrita, senão parece esquecimento.

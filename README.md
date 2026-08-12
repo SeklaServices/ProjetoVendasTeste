@@ -26,6 +26,7 @@ code review, resolução de conflitos, releases e hotfixes.
   - [6. Merge](#6-merge--e-a-branch-morre)
   - [7. Release e hotfix](#7-release-e-hotfix)
   - [Conflitos](#conflitos)
+  - [As regras não são só combinado](#as-regras-não-são-só-combinado)
   - [Por que fazer assim](#por-que-fazer-assim)
 - [Documentação completa](#documentação-completa)
 
@@ -70,13 +71,22 @@ git clone https://github.com/SeklaServices/ProjetoVendasTeste.git
 cd ProjetoVendasTeste
 ```
 
-```bash
-cd backend && dotnet run --project src/Host/Vendas.Host
+Antes de rodar o backend pela primeira vez, configure a sua string de conexão — veja
+[docs/05-setup.md](docs/05-setup.md) §3.
+
+```powershell
+cd backend; dotnet run --project src/Host/Vendas.Host
 ```
 
-```bash
-cd frontend && npm install && npm run dev
+```powershell
+cd frontend; npm install; npm run dev
 ```
+
+Backend em `http://localhost:5080` (documentação da API em `/scalar`), frontend em
+`http://localhost:5173`.
+
+> **Windows PowerShell 5.1 não aceita `&&`** para encadear comandos — use `;`, que funciona em
+> PowerShell, `pwsh` e Git Bash.
 
 ---
 
@@ -258,17 +268,17 @@ git switch -c release/1.0.0          # a partir de develop
 # PR para main → merge commit
 git tag -a v1.0.0 -m "Release 1.0.0"
 git push origin v1.0.0
-git switch develop && git merge main && git push    # devolver os ajustes
+git switch develop; git merge main; git push    # devolver os ajustes
 ```
 
 **Hotfix** — bug em produção que não pode esperar:
 
 ```bash
-git switch main && git pull
+git switch main; git pull
 git switch -c hotfix/31-total-negativo
 # corrigir + escrever o teste que reproduz o bug
 # PR para main → merge commit → tag v1.0.1
-git switch develop && git merge main && git push    # ← a etapa que todo mundo esquece
+git switch develop; git merge main; git push    # ← a etapa que todo mundo esquece
 ```
 
 Hotfix sai de `main`, não de `develop` — senão a correção viria junto com funcionalidades ainda
@@ -297,6 +307,38 @@ git rebase --abort
 
 `--force-with-lease` recusa o push se outra pessoa tiver mexido na sua branch. `--force` puro
 apaga o trabalho dela sem avisar. **Nunca force push em `main` ou `develop`.**
+
+## As regras não são só combinado
+
+Tudo acima está **configurado no GitHub**, não apenas escrito aqui. As regras rodam no servidor,
+quando o push chega — não dependem de ninguém lembrar:
+
+```
+$ git push origin main
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: - Changes must be made through a pull request.
+```
+
+O que o servidor impede, e não há como contornar:
+
+| Tentativa | Resultado |
+|---|---|
+| `git push` direto em `main` ou `develop` | Recusado |
+| Merge sem 1 aprovação | Botão de merge bloqueado |
+| Merge com CI vermelho | Botão de merge bloqueado |
+| Aprovar o próprio PR | O GitHub não oferece a opção |
+| Commitar depois de aprovado e mergear | A aprovação é derrubada; precisa de nova |
+| Merge com comentário de review em aberto | Bloqueado |
+| `git push --force` em branch protegida | Recusado |
+| Apagar `main` ou `develop` | Recusado |
+| Admin "pular" a regra | `bypass_actors` está vazio — nem admin passa |
+
+A configuração está versionada em [`.github/rulesets/`](.github/rulesets/), o que significa que
+**mudar as regras também é um PR**: fica no histórico, com autor, data e motivo.
+
+Como aplicar num repositório novo, o que cada regra faz, e o que mais dá para ligar (proteção
+contra segredo commitado, Dependabot, rulesets no nível da organização):
+**[docs/08-protecao-do-repositorio.md](docs/08-protecao-do-repositorio.md)**.
 
 ## Por que fazer assim
 
@@ -327,3 +369,4 @@ em algum projeto.
 | 5 | [docs/05-setup.md](docs/05-setup.md) | Montar o ambiente do zero |
 | 6 | [docs/06-exercicios-git.md](docs/06-exercicios-git.md) | 11 exercícios práticos, em 4 níveis |
 | 7 | [docs/07-decisoes.md](docs/07-decisoes.md) | Decisões tomadas e o porquê de cada uma |
+| 8 | [docs/08-protecao-do-repositorio.md](docs/08-protecao-do-repositorio.md) | Como o GitHub aplica as regras sozinho |
