@@ -13,8 +13,8 @@ arquitetura do `CeasaSystemNext`, para que a prática de git aqui se pareça com
 | CeasaSystemNext (real) | ProjetoVendasTeste (treino) |
 |---|---|
 | .NET 10, Minimal API, sem Controllers | ✅ Igual |
-| Clean Architecture por módulo (Domain/Application/Infrastructure/Api) | ✅ Igual, com **2 módulos** |
-| 20 módulos | **2 módulos**: `Cadastros`, `Movimentos` |
+| Clean Architecture por módulo (Domain/Application/Infrastructure/Api) | ✅ Igual |
+| 20 módulos | **2 módulos**: `Cadastros`, `Movimentos`. O terceiro, `Estoque`, entra pela [D-008](07-decisoes.md#d-008--o-sistema-passa-a-controlar-estoque) (issue #7) |
 | EF Core (escrita) + Dapper (leitura) | **Só EF Core** — Dapper é complexidade sem retorno aqui |
 | Nomes de pastas, classes e campos em **português** | ✅ Igual |
 | Multi-empresa, multi-filial, RBAC, Outbox | ❌ Nada disso |
@@ -117,7 +117,12 @@ public sealed class CriarProdutoCommandHandler(IProdutoRepositorio repositorio)
 
 ## 4. Modelo de dados
 
-Cinco tabelas. Sem tabela de estoque — por decisão de escopo.
+Cinco tabelas hoje.
+
+> **Muda em breve:** a [D-008](07-decisoes.md#d-008--o-sistema-passa-a-controlar-estoque) criou o
+> módulo `Estoque`, com a tabela `MovimentosEstoque` — um registro por entrada ou saída, e **nenhuma
+> tabela de saldo** (o saldo é a soma dos movimentos). A implementação está na issue #7; esta seção
+> é atualizada junto com ela.
 
 ```
 Produtos

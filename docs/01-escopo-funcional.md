@@ -110,7 +110,28 @@ produto), Subtotal calculado.
 
 **Regras:** mesmas da compra — mínimo um item, sem edição após salvar.
 
-### 2.5 Resumo (tela inicial)
+### 2.5 Estoque
+
+Cada produto tem um **saldo**, movimentado automaticamente pelos documentos:
+
+- Uma **compra** gera uma **entrada** de estoque para cada item, na quantidade do item
+- Uma **venda** gera uma **saída**
+- **Excluir** um documento apaga os movimentos que ele gerou — o saldo volta ao que era
+
+**Não existe tabela de saldo.** O saldo é a soma dos movimentos do produto. Isso torna impossível
+o saldo divergir do histórico (ver `07-decisoes.md` D-008).
+
+**Regras:**
+- Vender mais do que o saldo disponível **é permitido**. A venda é gravada e o sistema **avisa**:
+  *"Estoque insuficiente: 'BAN001 — Banana Prata' tinha 70 KG e a venda usou 100 KG."*
+- Como consequência, **o saldo pode ficar negativo**. Não é erro: significa que saiu mais do que
+  entrou no que foi registrado. A tela mostra em vermelho.
+- Compras nunca são bloqueadas nem geram aviso.
+
+**Tela:** posição de todos os produtos com o saldo atual, busca por código ou nome, filtro
+"somente com saldo", e o histórico de movimentos de cada produto com a origem de cada um.
+
+### 2.6 Resumo (tela inicial)
 
 Painel simples, somente leitura, com:
 
@@ -130,7 +151,6 @@ Esta lista é normativa. Nada aqui entra sem uma decisão explícita registrada.
 
 | Fora de escopo | Por quê |
 |---|---|
-| **Controle de estoque** | Decisão do responsável. Não há saldo, não há validação de disponibilidade, não há movimento de estoque. Uma venda de 100 unidades de um produto que nunca foi comprado é **válida**. |
 | Cadastro de **fornecedores** | A compra continua com texto livre. O cadastro de **clientes** passou a existir (D-009). |
 | Autenticação, login, permissões | Ambiente local, sem dados reais. Vira exercício opcional. |
 | Multi-empresa / multi-filial | Complexidade do sistema real, desnecessária aqui. |
@@ -154,8 +174,10 @@ Não há hierarquia, aprovação ou segregação de acesso.
 |---|---|
 | **Cliente** | Cadastro de quem compra. Código sequencial gerado pelo sistema. A venda aponta para ele. |
 | **Cliente não identificado** | Cliente genérico criado pela migration, que recebeu as vendas anteriores ao cadastro. |
-| **Compra** | Documento de entrada de mercadoria. Não afeta estoque (não existe estoque). |
-| **Venda** | Documento de saída de mercadoria. Não afeta estoque. |
+| **Compra** | Documento de entrada de mercadoria. Gera entrada de estoque. |
+| **Venda** | Documento de saída de mercadoria. Gera saída de estoque. |
+| **Movimento de estoque** | Um registro de entrada ou saída de um produto, com a origem. É a única fonte do saldo. |
+| **Saldo** | Soma dos movimentos de estoque de um produto. Calculado, nunca armazenado. |
 | **Movimento** | Termo guarda-chuva para compra ou venda. Nome do módulo que contém as duas. |
 | **Item** | Linha de um documento (compra ou venda), sempre ligada a um produto. |
 | **Subtotal** | Quantidade × preço unitário de um item. Sempre calculado, nunca digitado. |
