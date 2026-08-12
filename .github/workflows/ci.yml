@@ -1,0 +1,110 @@
+name: CI
+
+# Roda em todo push para as branches protegidas e em TODO pull request que as tenha como base.
+# É o resultado destes jobs que a branch protection exige como "status check" antes do merge.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Menor privilégio: este CI só precisa ler o repositório.
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  NODE_VERSION: '24.x'
+
+jobs:
+  backend:
+    name: Backend — Build e Testes
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Enquanto o backend não existe (repositório recém-criado, só com documentação), o job passa
+      # sem fazer nada. Remover este passo quando o esqueleto da solução entrar (PR 1) não é
+      # necessário — ele simplesmente deixa de ser acionado.
+      - name: Existe backend?
+        id: check
+        run: |
+          if [ -f backend/ProjetoVendasTeste.slnx ]; then
+            echo "existe=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "existe=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Backend ainda não existe neste commit — job encerrado sem erro."
+          fi
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        if: steps.check.outputs.existe == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet
+        if: steps.check.outputs.existe == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('backend/**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Restore
+        if: steps.check.outputs.existe == 'true'
+        working-directory: backend
+        run: dotnet restore ProjetoVendasTeste.slnx
+
+      - name: Build
+        if: steps.check.outputs.existe == 'true'
+        working-directory: backend
+        run: dotnet build ProjetoVendasTeste.slnx --no-restore -c Release
+
+      # Não precisa de banco: a suíte é só de testes unitários (ver docs/07-decisoes.md D-005).
+      - name: Testes unitários
+        if: steps.check.outputs.existe == 'true'
+        working-directory: backend
+        run: dotnet test ProjetoVendasTeste.slnx --no-build -c Release --logger "console;verbosity=normal"
+
+  frontend:
+    name: Frontend — Type-check e Build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Existe frontend?
+        id: check
+        run: |
+          if [ -f frontend/package.json ]; then
+            echo "existe=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "existe=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Frontend ainda não existe neste commit — job encerrado sem erro."
+          fi
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        if: steps.check.outputs.existe == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # npm ci (e não npm install): instala exatamente o que está no package-lock.json.
+      # Se o lock estiver desatualizado em relação ao package.json, ele falha — de propósito.
+      - name: Install
+        if: steps.check.outputs.existe == 'true'
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type-check
+        if: steps.check.outputs.existe == 'true'
+        working-directory: frontend
+        run: npm run type-check
+
+      - name: Build
+        if: steps.check.outputs.existe == 'true'
+        working-directory: frontend
+        run: npm run build

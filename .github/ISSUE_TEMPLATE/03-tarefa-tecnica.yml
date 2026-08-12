@@ -1,0 +1,49 @@
+name: "Tarefa técnica"
+description: "Refatoração, dependência, CI, documentação — mudanças sem efeito visível para quem usa"
+title: "chore(escopo): "
+labels: ["tarefa-tecnica"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use quando a mudança não altera o que o sistema faz, só como ele faz.
+        Ajuste o prefixo do título para o tipo correto: `refactor`, `chore`, `ci`, `docs`, `test`, `perf`.
+
+  - type: textarea
+    id: descricao
+    attributes:
+      label: O que precisa ser feito
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivo
+    attributes:
+      label: Por que agora
+      description: Tarefa técnica sem motivo claro vira dívida disfarçada de trabalho.
+    validations:
+      required: true
+
+  - type: textarea
+    id: risco
+    attributes:
+      label: O que pode quebrar
+      description: Se a resposta for "nada", explique como você sabe disso.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: escopo
+    attributes:
+      label: Escopo
+      multiple: true
+      options:
+        - cadastros
+        - movimentos
+        - host
+        - frontend
+        - ci
+        - docs
+        - deps
+    validations:
+      required: true

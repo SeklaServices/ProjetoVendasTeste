@@ -1,0 +1,10 @@
+# Força o uso dos templates: nada de issue em branco.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Como funciona o fluxo de trabalho
+    url: https://github.com/SeklaServices/ProjetoVendasTeste/blob/main/docs/03-fluxo-git.md
+    about: Branches, commits, pull requests, code review, conflitos, release e hotfix.
+  - name: Escopo do sistema
+    url: https://github.com/SeklaServices/ProjetoVendasTeste/blob/main/docs/01-escopo-funcional.md
+    about: O que o sistema faz e o que ele deliberadamente não faz. Leia antes de abrir uma issue.

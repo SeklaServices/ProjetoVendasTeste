@@ -1,0 +1,65 @@
+name: "Funcionalidade"
+description: "Algo novo que o sistema passa a fazer"
+title: "feat(escopo): "
+labels: ["funcionalidade"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Uma issue = uma branch = um PR. Se o que você vai descrever não cabe em um PR de
+        até ~400 linhas, abra duas issues.
+
+  - type: textarea
+    id: descricao
+    attributes:
+      label: O que precisa existir
+      description: Descreva o comportamento desejado do ponto de vista de quem usa o sistema.
+      placeholder: |
+        O usuário precisa conseguir registrar uma observação em cada produto, para anotar
+        informações que não cabem nos campos existentes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivo
+    attributes:
+      label: Por que
+      description: Que problema isso resolve. Se for exercício de treino, diga qual.
+    validations:
+      required: true
+
+  - type: textarea
+    id: aceite
+    attributes:
+      label: Critérios de aceite
+      description: A lista que o revisor vai usar para dizer "está pronto". Seja verificável.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: escopo
+    attributes:
+      label: Escopo
+      description: Onde a mudança acontece — vira o escopo do commit.
+      multiple: true
+      options:
+        - cadastros
+        - movimentos
+        - host
+        - frontend
+        - ci
+        - docs
+        - deps
+    validations:
+      required: true
+
+  - type: textarea
+    id: fora
+    attributes:
+      label: Fora de escopo
+      description: O que esta issue deliberadamente NÃO faz. Evita que o PR cresça.
+      placeholder: "Não inclui exportação do campo para CSV — isso é outra issue."

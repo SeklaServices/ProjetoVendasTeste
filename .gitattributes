@@ -1,0 +1,25 @@
+# Normaliza o fim de linha. Sem isto, um Windows e um Linux commitando o mesmo arquivo produzem
+# um diff que mostra o arquivo INTEIRO alterado — e o review vira impossível.
+# Regra prática: se um PR mostrar centenas de linhas alteradas num arquivo que você mal tocou,
+# o problema é fim de linha. NÃO altere core.autocrlf para "resolver".
+* text=auto eol=lf
+
+# Scripts que só rodam no Windows precisam de CRLF.
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Binários: o git não deve tentar normalizar nada.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.dll   binary
+*.exe   binary
+*.bak   binary
+
+# Arquivos gerados: some do diff do PR por padrão (ainda são versionados).
+package-lock.json linguist-generated=true

@@ -1,0 +1,61 @@
+name: "Bug"
+description: "Algo que o sistema faz errado"
+title: "fix(escopo): "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Um bug só é corrigível se for reproduzível. Se você não consegue reproduzir, descreva
+        o que observou mesmo assim — mas diga que não conseguiu reproduzir.
+
+  - type: textarea
+    id: comportamento-atual
+    attributes:
+      label: O que acontece
+      description: O comportamento errado, como você o observou.
+    validations:
+      required: true
+
+  - type: textarea
+    id: comportamento-esperado
+    attributes:
+      label: O que deveria acontecer
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Como reproduzir
+      description: Passo a passo, do zero. Inclua os dados usados.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: input
+    id: versao
+    attributes:
+      label: Onde foi observado
+      description: Branch, tag ou commit. Ex.- `v1.0.0`, `develop`, `a1b2c3d`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgencia
+    attributes:
+      label: Urgência
+      options:
+        - "Baixa — pode entrar na próxima release (branch fix/*, sai de develop)"
+        - "Alta — quebra o uso normal e está em main (branch hotfix/*, sai de main)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Evidência
+      description: Print, log, mensagem de erro. Cole o texto do erro, não só a foto dele.
