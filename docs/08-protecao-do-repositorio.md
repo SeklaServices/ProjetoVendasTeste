@@ -1,7 +1,6 @@
 # 08 — Proteção do Repositório (as regras que o Git aplica sozinho)
 
-**Status:** para aplicar no GitHub
-**Versão:** 1.0
+**Versão:** 2.0
 
 > Regra escrita num documento é combinado. Regra configurada no GitHub é **impedimento**. Este
 > documento cobre a segunda.
@@ -127,8 +126,8 @@ sequência fica no log de auditoria da organização, que é exatamente onde dev
 ### Rulesets no nível da organização
 
 Em **Settings da organização → Rules → Rulesets**, dá para aplicar regras a **todos os
-repositórios** de uma vez, com padrão de nome (`repo:*`). É como o projeto oficial deveria ser
-protegido: a regra passa a existir antes do repositório, e ninguém precisa lembrar de configurar.
+repositórios** de uma vez, com padrão de nome (`repo:*`). A regra passa a existir antes do
+repositório, e ninguém precisa lembrar de configurar.
 
 ### `push` ruleset — bloquear arquivo por conteúdo
 
@@ -141,12 +140,12 @@ ou um `.bak` de 200 MB entrem no repositório mesmo que alguém edite o `.gitign
 Em **Settings → Code security**, o `Push protection` recusa o push que contém o que parece ser uma
 credencial (token, chave de API, string de conexão com senha). Vale ligar — é gratuito em
 repositório privado dentro do GitHub Team/Enterprise, e é a única barreira que age *antes* de o
-segredo entrar no histórico. **Para o projeto oficial, isto é mais importante do que tudo acima.**
+segredo entrar no histórico. **É a proteção mais importante deste documento.**
 
 ### Dependabot
 
 **Settings → Code security → Dependabot alerts / security updates**: abre PR automaticamente quando
-uma dependência tem vulnerabilidade conhecida. Bom exercício de review, aliás — o time revisa PRs
+uma dependência tem vulnerabilidade conhecida. O time revisa PRs
 que não escreveu.
 
 ### Hooks locais (opcional)

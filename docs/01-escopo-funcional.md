@@ -1,30 +1,30 @@
 # 01 — Escopo Funcional
 
-**Status:** proposta para validação
-**Versão:** 1.0
+**Versão:** 2.0
 
 ---
 
 ## 1. Objetivo do projeto
 
-Construir um sistema web de vendas **deliberadamente simples**, para que a equipe do escritório
-pratique, na prática e com um repositório real, o fluxo de trabalho de desenvolvimento:
+Sistema web de vendas **deliberadamente enxuto**: cadastro de produtos e clientes, entradas de
+compra, saídas de venda e um resumo do período.
 
-- criar branches de feature
-- abrir pull requests
-- revisar código de outra pessoa
-- resolver conflitos de merge
-- promover `develop` → `main` via release
-- corrigir produção com hotfix
+O escopo pequeno é uma **escolha de projeto**, não uma limitação. Ela produz três efeitos que
+importam:
 
-O sistema precisa ser **pequeno o suficiente para caber na cabeça** de qualquer pessoa em 15
-minutos, e **grande o suficiente para gerar PRs de verdade** — que tocam backend, frontend, banco e
-testes ao mesmo tempo.
+- **O sistema inteiro cabe na cabeça** de quem chega, em cerca de 15 minutos
+- **Todo PR é revisável de verdade**, porque nenhuma mudança precisa ser gigante
+- **Toda ausência é explicável**: o que o sistema não faz está registrado com o motivo, em
+  [07-decisoes.md](07-decisoes.md)
 
-### Critério de sucesso
+### O critério que decide o que entra
 
-Não é "o sistema funciona". É: **toda pessoa da equipe consegue, sozinha, pegar uma tarefa, criar a
-branch, implementar, abrir o PR, receber review, resolver um conflito e ver o merge acontecer.**
+Uma funcionalidade só entra se **alguém precisa dela para operar**. "Seria bom ter" não é
+justificativa suficiente — vira item de backlog em [04-roadmap.md](04-roadmap.md), com o motivo
+escrito.
+
+Quando uma decisão de escopo muda, a decisão antiga é **superada**, nunca apagada. Foi o que
+aconteceu com o controle de estoque (D-002 → D-008) e com o cliente em texto livre (D-009).
 
 ---
 
@@ -141,7 +141,7 @@ Painel simples, somente leitura, com:
 - Quantidade de produtos cadastrados / ativos
 - Lista das 5 últimas compras e 5 últimas vendas
 
-Filtro por intervalo de datas. Sem gráficos na primeira versão (fica como exercício).
+Filtro por intervalo de datas. Sem gráficos — ver o backlog em `04-roadmap.md`.
 
 ---
 
@@ -152,12 +152,12 @@ Esta lista é normativa. Nada aqui entra sem uma decisão explícita registrada.
 | Fora de escopo | Por quê |
 |---|---|
 | Cadastro de **fornecedores** | A compra continua com texto livre. O cadastro de **clientes** passou a existir (D-009). |
-| Autenticação, login, permissões | Ambiente local, sem dados reais. Vira exercício opcional. |
-| Multi-empresa / multi-filial | Complexidade do sistema real, desnecessária aqui. |
+| Autenticação, login, permissões | Não há dados sensíveis nem acesso externo. Candidato de backlog. |
+| Multi-empresa / multi-filial | Só existe uma operação. Complexidade sem demanda. |
 | Fiscal (NF-e, impostos), financeiro (contas a pagar/receber) | Fora do propósito. |
 | Edição de compra/venda já salva | Reduz escopo deliberadamente. |
-| Relatórios em PDF/Excel, impressão | Exercício futuro. |
-| Deploy em produção real | O "deploy" aqui é simbólico: merge em `main` + tag. |
+| Relatórios em PDF/Excel, impressão | Candidato de backlog. Exportar CSV vem antes. |
+| Deploy automatizado | A publicação é manual: merge em `main`, tag e release. |
 
 ---
 

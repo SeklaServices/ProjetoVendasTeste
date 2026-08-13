@@ -29,7 +29,7 @@ construtor.Services.AddOpenApi();
 
 // CORS para o Vite em desenvolvimento. Qualquer porta de localhost é aceita porque o Vite pula
 // para 5174, 5175… quando a 5173 está ocupada — e ninguém deveria perder tempo com isso.
-// Num sistema real a lista de origens seria fixa e viria de configuração por ambiente.
+// Em producao a lista de origens e fixa e vem de configuracao por ambiente.
 const string PoliticaCors = "frontend-local";
 construtor.Services.AddCors(opcoes => opcoes.AddPolicy(PoliticaCors, politica => politica
     .SetIsOriginAllowed(origem =>
@@ -40,7 +40,7 @@ construtor.Services.AddCors(opcoes => opcoes.AddPolicy(PoliticaCors, politica =>
 
 var app = construtor.Build();
 
-// Aplica as migrations no boot. Aceitável num projeto de treino com banco local; num sistema real
+// Aplica as migrations no boot, apenas em Development, onde cada dev tem seu banco local. Em
 // isso é papel do pipeline de deploy, não da aplicação.
 if (app.Environment.IsDevelopment())
 {

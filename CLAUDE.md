@@ -10,19 +10,19 @@
 ## 1. O que é este projeto
 
 Sistema web simples de vendas — cadastro de produtos, entradas de compra e saídas de venda —
-construído para servir de **campo de treino do fluxo de trabalho com Git e GitHub** no escritório.
+com escopo **deliberadamente enxuto**.
 
-**O produto real deste projeto é a prática do fluxo, não o software.** Toda decisão técnica se
-subordina a isso: se algo torna o sistema mais completo mas o fluxo mais confuso, não entra.
+**Escopo pequeno é decisão, não limitação.** Se algo torna o sistema mais completo mas o código
+menos legível ou o review mais difícil, não entra sem uma decisão registrada em
+`docs/07-decisoes.md`.
 
 **O que este projeto não é:**
 - Não é um ERP, nem um protótipo de um
 - Não é fiscal nem financeiro
-- Não vai para produção real
 - Não é lugar para experimentar arquitetura
 
-**Referência:** a arquitetura é uma redução fiel do `C:\ProjetosClaude\CeasaSystemNext`. Quando
-houver dúvida sobre "como se faz aqui", a resposta é "como se faz lá, só que menor".
+**Referência arquitetural:** `C:\ProjetosClaude\CeasaSystemNext`. Quando houver dúvida sobre "como
+se faz aqui", a resposta é "como se faz lá, só que menor".
 
 ---
 

@@ -1,7 +1,7 @@
 # 07 — Registro de Decisões
 
 Toda decisão que alguém pode questionar daqui a seis meses fica aqui, com o motivo. Formato
-enxuto de ADR (*Architecture Decision Record*) — o mesmo hábito do projeto oficial.
+enxuto de ADR (*Architecture Decision Record*).
 
 ---
 
@@ -54,7 +54,7 @@ compartilhar banco:
 - Um **script de seed** versionado no repositório, que popula o banco com dados de exemplo. Todo
   mundo roda o mesmo script e tem os mesmos dados — e o script está no git, então evolui por PR
   como qualquer outro código.
-- Para o projeto oficial, onde a massa realista importa mais: um **backup restaurável** com dados
+- Quando a massa realista importar mais: um **backup restaurável** com dados
   anonimizados, que cada dev restaura na própria máquina.
 
 O segundo argumento — "instalar SQL Server em cada máquina dá trabalho" — se paga uma vez.
@@ -82,9 +82,9 @@ tabela — ele seria um ambiente sem branch correspondente.
 > O texto abaixo é o original, mantido intacto. Decisão registrada não se apaga — se supera. Quem
 > ler o histórico daqui a um ano precisa entender tanto o que valia antes quanto por que mudou.
 
-Decisão do responsável. O objetivo do projeto é treinar o fluxo de trabalho, não modelar um ERP.
-Estoque traria saldo, validação de disponibilidade, custo médio e concorrência — tudo relevante no
-sistema real, tudo ruído aqui.
+Decisão do responsável. O objetivo é um sistema de lançamento enxuto, não um ERP.
+Estoque traria saldo, validação de disponibilidade, custo médio e concorrência — peso que o escopo
+atual não comporta.
 
 Consequência: uma venda de 100 unidades de um produto nunca comprado é **válida**. Isso não é bug.
 
@@ -100,7 +100,7 @@ Poderiam ser dois módulos. Ficaram em um, por dois motivos:
 1. São estruturalmente idênticos (cabeçalho + itens, total calculado). Separar duplicaria a
    estrutura sem ensinar nada novo.
 2. Duas pessoas trabalhando no mesmo módulo **geram conflitos de merge reais** — que é justamente
-   a matéria-prima que o projeto precisa produzir.
+   trabalho paralelo real, que é o que o fluxo de PR existe para coordenar.
 
 ---
 
@@ -110,8 +110,10 @@ Poderiam ser dois módulos. Ficaram em um, por dois motivos:
 **Status:** Aceita
 
 Só criar e excluir. Editar um documento com itens abre discussão de versionamento, histórico e
-estorno — assunto pesado, e sem relação com o objetivo. Se a equipe quiser, vira exercício depois:
-é uma boa oportunidade de praticar **reverter uma decisão documentada** (ver `06-exercicios-git.md`).
+estorno de movimento — peso desproporcional para o ganho.
+
+Documento errado se exclui e se refaz. Se um dia o volume tornar isso inviável, esta decisão é
+superada por uma nova, com o motivo escrito.
 
 ---
 
@@ -120,11 +122,15 @@ estorno — assunto pesado, e sem relação com o objetivo. Se a equipe quiser, 
 **Data:** 2026-08-12
 **Status:** Aceita
 
-Sem testes de integração com banco, sem E2E. O que o projeto precisa é de um `dotnet test` rápido
-que **fica vermelho quando alguém quebra uma regra** — porque o CI vermelho bloqueando um PR é
-parte do que se está treinando. Testes de integração custariam mais setup do que ensinariam.
+Sem testes de integração com banco, sem E2E. O que o sistema precisa é de um `dotnet test` rápido
+que **fica vermelho quando alguém quebra uma regra**, e que roda em todo PR sem depender de
+infraestrutura.
 
-No projeto oficial eles existem e são obrigatórios. Aqui, não.
+Toda a regra de negócio vive no Domain e na Application, onde é testável sem banco. Testes de
+integração cobririam sobretudo mapeamento do EF Core — custo de setup alto para risco baixo.
+
+**Revisar quando:** aparecer uma consulta complexa o bastante para que um erro de mapeamento passe
+despercebido pelos unitários.
 
 ---
 
@@ -139,11 +145,10 @@ transitivamente por `Microsoft.AspNetCore.OpenApi` 10.0.0, e ainda não há vers
 3.x foi testada e **não** compila com o source generator do ASP.NET Core 10 (`error CS0200`).
 
 **Decisão:** manter o aviso **visível**. Não usar `NoWarn` nem `NuGetAuditMode` para escondê-lo —
-suprimir alerta de segurança é pior que conviver com ele sabendo. A documentação da API (Scalar) só
-é exposta em `Development`, e o projeto não vai a produção.
+suprimir alerta de segurança é pior que conviver com ele sabendo. A superfície exposta é pequena: a
+documentação da API (Scalar) só é servida em `Development`.
 
-**Revisar quando:** sair uma 2.x corrigida, ou o ASP.NET Core passar a suportar a 3.x. É um bom
-primeiro PR de `chore(deps)` para alguém da equipe.
+**Revisar quando:** sair uma 2.x corrigida, ou o ASP.NET Core passar a suportar a 3.x.
 
 ---
 
@@ -166,8 +171,8 @@ ordem obrigatória de aplicação.
   produto já usado
 
 É uma troca consciente: perde-se a garantia do banco, ganha-se modularidade — e ganha-se uma
-mensagem de erro decente em vez de uma violação de constraint. Essa mesma troca aparece no projeto
-oficial e é o tipo de decisão que precisa estar escrita, senão parece esquecimento.
+mensagem de erro decente em vez de uma violação de constraint. É o tipo de decisão que precisa
+estar escrita, senão parece esquecimento.
 
 ---
 
@@ -264,8 +269,8 @@ por cliente, endereço, e qualquer campo fiscal.
 O sistema passa a controlar o estoque dos produtos. Compras aumentam o saldo, vendas diminuem, e
 a posição é consultável.
 
-O projeto continua sendo, antes de tudo, um campo de treino do fluxo de trabalho. O estoque entra
-porque dá material de trabalho realista para a equipe — não porque o objetivo mudou.
+O escopo continua enxuto: entra o saldo e o histórico de movimentos, e nada além disso. Custo
+médio, valorização, depósitos e inventário seguem fora — cada um exigiria a sua própria decisão.
 
 ### As sete perguntas
 

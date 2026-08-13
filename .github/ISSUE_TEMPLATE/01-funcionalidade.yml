@@ -24,7 +24,7 @@ body:
     id: motivo
     attributes:
       label: Por que
-      description: Que problema isso resolve. Se for exercício de treino, diga qual.
+      description: Que problema isso resolve, e para quem.
     validations:
       required: true
 
