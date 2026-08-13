@@ -102,7 +102,7 @@ Formato obrigatório — igual ao projeto real:
 
 **Tipos aceitos:** `feat`, `fix`, `test`, `docs`, `refactor`, `chore`, `ci`, `perf`
 
-**Escopos deste projeto:** `cadastros`, `movimentos`, `host`, `frontend`, `ci`, `docs`, `deps`
+**Escopos deste projeto:** `cadastros`, `movimentos`, `estoque`, `host`, `frontend`, `ci`, `docs`, `deps`
 
 ```
 feat(cadastros): adiciona validacao de codigo duplicado no produto

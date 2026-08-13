@@ -168,12 +168,20 @@ está publicado, e para conseguir voltar a ele.
 | **Vendas** | Saída de mercadoria — mesma estrutura, com cliente selecionado do cadastro |
 | **Resumo** | Totais de compras e vendas no período, e as últimas movimentações |
 
-**O que ele deliberadamente NÃO faz:** controle de estoque, cadastro de fornecedores (a compra usa
-texto livre), login, fiscal, financeiro, edição de documento já salvo.
+| **Estoque** | Saldo por produto, movimentado pelas compras e vendas, com histórico de cada movimento |
+
+**O que ele deliberadamente NÃO faz:** cadastro de fornecedores (a compra usa texto livre), login,
+fiscal, financeiro, edição de documento já salvo.
 
 Isso não é esquecimento — é decisão registrada em [docs/07-decisoes.md](docs/07-decisoes.md).
-**Vender 100 unidades de um produto que nunca foi comprado é válido neste sistema**, porque não
-existe estoque. Se um dia mudar, a decisão antiga é *superada*, não apagada.
+**Vender mais do que o saldo disponível é permitido**: o sistema grava a venda e avisa, em vez de
+bloquear (D-008, pergunta 5). Como consequência, o saldo pode ficar negativo — e isso também não
+é bug.
+
+> O sistema **não tinha** estoque até 2026-08-12, por decisão registrada (D-002). Quando isso
+> mudou, a decisão antiga não foi apagada: foi marcada como **superada** pela D-008, com o motivo.
+> Esse é o padrão do projeto — o histórico precisa explicar tanto o que valia antes quanto por que
+> mudou.
 
 ### Stack
 
@@ -409,7 +417,7 @@ Formato obrigatório:
 ```
 
 **Tipos:** `feat` `fix` `test` `docs` `refactor` `chore` `ci` `perf`
-**Escopos:** `cadastros` `movimentos` `host` `frontend` `ci` `docs` `deps`
+**Escopos:** `cadastros` `movimentos` `estoque` `host` `frontend` `ci` `docs` `deps`
 
 ```
 feat(cadastros): adiciona validacao de codigo duplicado no produto
