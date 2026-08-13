@@ -10,19 +10,19 @@
 ## 1. O que é este projeto
 
 Sistema web simples de vendas — cadastro de produtos, entradas de compra e saídas de venda —
-construído para servir de **campo de treino do fluxo de trabalho com Git e GitHub** no escritório.
+com escopo **deliberadamente enxuto**.
 
-**O produto real deste projeto é a prática do fluxo, não o software.** Toda decisão técnica se
-subordina a isso: se algo torna o sistema mais completo mas o fluxo mais confuso, não entra.
+**Escopo pequeno é decisão, não limitação.** Se algo torna o sistema mais completo mas o código
+menos legível ou o review mais difícil, não entra sem uma decisão registrada em
+`docs/07-decisoes.md`.
 
 **O que este projeto não é:**
 - Não é um ERP, nem um protótipo de um
-- Não controla estoque (decisão explícita do responsável)
-- Não vai para produção real
+- Não é fiscal nem financeiro
 - Não é lugar para experimentar arquitetura
 
-**Referência:** a arquitetura é uma redução fiel do `C:\ProjetosClaude\CeasaSystemNext`. Quando
-houver dúvida sobre "como se faz aqui", a resposta é "como se faz lá, só que menor".
+**Referência arquitetural:** `C:\ProjetosClaude\CeasaSystemNext`. Quando houver dúvida sobre "como
+se faz aqui", a resposta é "como se faz lá, só que menor".
 
 ---
 
@@ -47,7 +47,8 @@ Adicionar dependência nova exige PR próprio, tipo `chore(deps)`, com justifica
 
 ## 3. Arquitetura
 
-- **Monólito modular**, 2 módulos: `Cadastros` (produtos) e `Movimentos` (compras e vendas)
+- **Monólito modular**: `Cadastros` (produtos), `Movimentos` (compras e vendas) e `Estoque`
+  (movimentos de estoque — criado pela D-008, em implementação)
 - **Clean Architecture** por módulo: `Domain ← Application ← Infrastructure`, `Api` na borda
 - **Um `DbContext` por módulo**, no mesmo banco físico
 - Comunicação entre módulos apenas por interface em `Vendas.Shared` — nunca por `DbContext`
@@ -64,7 +65,7 @@ Detalhes em [docs/02-arquitetura.md](docs/02-arquitetura.md).
 | Regra de negócio em Endpoint | Viola Clean Architecture, impossibilita teste |
 | Regra de negócio em Repositório | Repositório é persistência, não conhece regra |
 | Acessar o `DbContext` de outro módulo | Destrói a modularidade |
-| Implementar controle de estoque | Fora de escopo por decisão do responsável |
+| Manter tabela de saldo de estoque | O saldo é a soma dos movimentos. Tabela de saldo dessincroniza — D-008 |
 | String de conexão, senha ou segredo no código-fonte | Fica no histórico do git para sempre |
 | Commitar `appsettings.Development.json` ou `.env.local` | Quebra o ambiente de todo mundo |
 | SQL por concatenação de string | SQL injection |
@@ -110,7 +111,7 @@ avisar.
 | `hotfix/{n}-descricao` | `main` | `main` (e depois `develop`) | Merge commit + tag |
 
 Commits: `{tipo}({escopo}): {descrição em português}` — tipos `feat`, `fix`, `test`, `docs`,
-`refactor`, `chore`, `ci`, `perf`; escopos `cadastros`, `movimentos`, `host`, `frontend`, `ci`,
+`refactor`, `chore`, `ci`, `perf`; escopos `cadastros`, `movimentos`, `estoque`, `host`, `frontend`, `ci`,
 `docs`, `deps`.
 
 Detalhes, incluindo review, conflitos e release: [docs/03-fluxo-git.md](docs/03-fluxo-git.md).

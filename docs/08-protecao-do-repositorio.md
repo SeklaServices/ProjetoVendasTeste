@@ -1,7 +1,6 @@
 # 08 — Proteção do Repositório (as regras que o Git aplica sozinho)
 
-**Status:** para aplicar no GitHub
-**Versão:** 1.0
+**Versão:** 2.0
 
 > Regra escrita num documento é combinado. Regra configurada no GitHub é **impedimento**. Este
 > documento cobre a segunda.
@@ -81,8 +80,38 @@ como "não encontrado" na importação, rode um PR qualquer primeiro e importe d
 | `strict_required_status_checks_policy` | A branch precisa estar **atualizada com a base**. É o que força o `rebase` antes do merge. |
 | `non_fast_forward` | `git push --force` na branch protegida é recusado. Histórico não se reescreve. |
 | `deletion` | A branch não pode ser apagada, nem por acidente. |
-| `allowed_merge_methods` | `develop` só aceita **squash**; `main` aceita squash e merge commit (release e hotfix usam merge commit). |
+| `allowed_merge_methods` | **`main` só aceita merge commit.** `develop` aceita squash (features) e merge commit (reconciliação vinda da `main`). Ver abaixo — essa configuração não é detalhe. |
 | `bypass_actors: []` | **Ninguém** contorna — nem admin, nem o dono do repositório. |
+
+### Por que a `main` não aceita squash
+
+Isso não é preferência de estilo — é o que impede um problema real, e aconteceu aqui em 2026-08-13.
+
+**Squash não é merge.** Ele pega os commits da origem, joga fora a ligação com eles, e cria um
+commit novo com o conteúdo copiado. Para o git, o resultado não tem nenhum parentesco com a branch
+de onde veio.
+
+Para uma branch de feature isso é ótimo: ela morre logo depois, e a `develop` fica com um commit
+limpo por funcionalidade.
+
+Para `main` e `develop` é destrutivo. As duas vivem para sempre e precisam continuar se
+reconhecendo. Quando a `develop` foi mergeada na `main` com squash, as duas ficaram com **conteúdo
+idêntico e histórias separadas** — e o git passou a tratá-las como trabalhos independentes. O
+sintoma: todo release seguinte acusa conflito em arquivos que são iguais nos dois lados.
+
+Pior ainda: com as histórias desligadas, qualquer PR que aponte para a `main` passa a ser comparado
+com o **primeiro commit do repositório**, e aí *tudo* vira conflito.
+
+Deixar só `merge` na `main` faz o botão errado **deixar de existir**. É a mesma lógica de todo o
+resto deste documento: regra que depende de alguém lembrar não é regra.
+
+A tabela completa, que também está no README:
+
+| De | Para | Método |
+|---|---|---|
+| `feature/*`, `fix/*` | `develop` | Squash |
+| `release/*`, `hotfix/*` | `main` | Merge commit |
+| `main` de volta para `develop` | `develop` | Merge commit |
 
 ### Sobre `bypass_actors` vazio
 
@@ -97,8 +126,8 @@ sequência fica no log de auditoria da organização, que é exatamente onde dev
 ### Rulesets no nível da organização
 
 Em **Settings da organização → Rules → Rulesets**, dá para aplicar regras a **todos os
-repositórios** de uma vez, com padrão de nome (`repo:*`). É como o projeto oficial deveria ser
-protegido: a regra passa a existir antes do repositório, e ninguém precisa lembrar de configurar.
+repositórios** de uma vez, com padrão de nome (`repo:*`). A regra passa a existir antes do
+repositório, e ninguém precisa lembrar de configurar.
 
 ### `push` ruleset — bloquear arquivo por conteúdo
 
@@ -111,12 +140,12 @@ ou um `.bak` de 200 MB entrem no repositório mesmo que alguém edite o `.gitign
 Em **Settings → Code security**, o `Push protection` recusa o push que contém o que parece ser uma
 credencial (token, chave de API, string de conexão com senha). Vale ligar — é gratuito em
 repositório privado dentro do GitHub Team/Enterprise, e é a única barreira que age *antes* de o
-segredo entrar no histórico. **Para o projeto oficial, isto é mais importante do que tudo acima.**
+segredo entrar no histórico. **É a proteção mais importante deste documento.**
 
 ### Dependabot
 
 **Settings → Code security → Dependabot alerts / security updates**: abre PR automaticamente quando
-uma dependência tem vulnerabilidade conhecida. Bom exercício de review, aliás — o time revisa PRs
+uma dependência tem vulnerabilidade conhecida. O time revisa PRs
 que não escreveu.
 
 ### Hooks locais (opcional)

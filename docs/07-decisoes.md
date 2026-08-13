@@ -1,7 +1,7 @@
 # 07 — Registro de Decisões
 
 Toda decisão que alguém pode questionar daqui a seis meses fica aqui, com o motivo. Formato
-enxuto de ADR (*Architecture Decision Record*) — o mesmo hábito do projeto oficial.
+enxuto de ADR (*Architecture Decision Record*).
 
 ---
 
@@ -54,7 +54,7 @@ compartilhar banco:
 - Um **script de seed** versionado no repositório, que popula o banco com dados de exemplo. Todo
   mundo roda o mesmo script e tem os mesmos dados — e o script está no git, então evolui por PR
   como qualquer outro código.
-- Para o projeto oficial, onde a massa realista importa mais: um **backup restaurável** com dados
+- Quando a massa realista importar mais: um **backup restaurável** com dados
   anonimizados, que cada dev restaura na própria máquina.
 
 O segundo argumento — "instalar SQL Server em cada máquina dá trabalho" — se paga uma vez.
@@ -77,11 +77,14 @@ tabela — ele seria um ambiente sem branch correspondente.
 ## D-002 — Sem controle de estoque
 
 **Data:** 2026-08-12
-**Status:** Aceita
+**Status:** ⚠️ **Superada pela [D-008](#d-008--o-sistema-passa-a-controlar-estoque) em 2026-08-12**
 
-Decisão do responsável. O objetivo do projeto é treinar o fluxo de trabalho, não modelar um ERP.
-Estoque traria saldo, validação de disponibilidade, custo médio e concorrência — tudo relevante no
-sistema real, tudo ruído aqui.
+> O texto abaixo é o original, mantido intacto. Decisão registrada não se apaga — se supera. Quem
+> ler o histórico daqui a um ano precisa entender tanto o que valia antes quanto por que mudou.
+
+Decisão do responsável. O objetivo é um sistema de lançamento enxuto, não um ERP.
+Estoque traria saldo, validação de disponibilidade, custo médio e concorrência — peso que o escopo
+atual não comporta.
 
 Consequência: uma venda de 100 unidades de um produto nunca comprado é **válida**. Isso não é bug.
 
@@ -97,7 +100,7 @@ Poderiam ser dois módulos. Ficaram em um, por dois motivos:
 1. São estruturalmente idênticos (cabeçalho + itens, total calculado). Separar duplicaria a
    estrutura sem ensinar nada novo.
 2. Duas pessoas trabalhando no mesmo módulo **geram conflitos de merge reais** — que é justamente
-   a matéria-prima que o projeto precisa produzir.
+   trabalho paralelo real, que é o que o fluxo de PR existe para coordenar.
 
 ---
 
@@ -107,8 +110,10 @@ Poderiam ser dois módulos. Ficaram em um, por dois motivos:
 **Status:** Aceita
 
 Só criar e excluir. Editar um documento com itens abre discussão de versionamento, histórico e
-estorno — assunto pesado, e sem relação com o objetivo. Se a equipe quiser, vira exercício depois:
-é uma boa oportunidade de praticar **reverter uma decisão documentada** (ver `06-exercicios-git.md`).
+estorno de movimento — peso desproporcional para o ganho.
+
+Documento errado se exclui e se refaz. Se um dia o volume tornar isso inviável, esta decisão é
+superada por uma nova, com o motivo escrito.
 
 ---
 
@@ -117,11 +122,15 @@ estorno — assunto pesado, e sem relação com o objetivo. Se a equipe quiser, 
 **Data:** 2026-08-12
 **Status:** Aceita
 
-Sem testes de integração com banco, sem E2E. O que o projeto precisa é de um `dotnet test` rápido
-que **fica vermelho quando alguém quebra uma regra** — porque o CI vermelho bloqueando um PR é
-parte do que se está treinando. Testes de integração custariam mais setup do que ensinariam.
+Sem testes de integração com banco, sem E2E. O que o sistema precisa é de um `dotnet test` rápido
+que **fica vermelho quando alguém quebra uma regra**, e que roda em todo PR sem depender de
+infraestrutura.
 
-No projeto oficial eles existem e são obrigatórios. Aqui, não.
+Toda a regra de negócio vive no Domain e na Application, onde é testável sem banco. Testes de
+integração cobririam sobretudo mapeamento do EF Core — custo de setup alto para risco baixo.
+
+**Revisar quando:** aparecer uma consulta complexa o bastante para que um erro de mapeamento passe
+despercebido pelos unitários.
 
 ---
 
@@ -136,11 +145,10 @@ transitivamente por `Microsoft.AspNetCore.OpenApi` 10.0.0, e ainda não há vers
 3.x foi testada e **não** compila com o source generator do ASP.NET Core 10 (`error CS0200`).
 
 **Decisão:** manter o aviso **visível**. Não usar `NoWarn` nem `NuGetAuditMode` para escondê-lo —
-suprimir alerta de segurança é pior que conviver com ele sabendo. A documentação da API (Scalar) só
-é exposta em `Development`, e o projeto não vai a produção.
+suprimir alerta de segurança é pior que conviver com ele sabendo. A superfície exposta é pequena: a
+documentação da API (Scalar) só é servida em `Development`.
 
-**Revisar quando:** sair uma 2.x corrigida, ou o ASP.NET Core passar a suportar a 3.x. É um bom
-primeiro PR de `chore(deps)` para alguém da equipe.
+**Revisar quando:** sair uma 2.x corrigida, ou o ASP.NET Core passar a suportar a 3.x.
 
 ---
 
@@ -163,8 +171,8 @@ ordem obrigatória de aplicação.
   produto já usado
 
 É uma troca consciente: perde-se a garantia do banco, ganha-se modularidade — e ganha-se uma
-mensagem de erro decente em vez de uma violação de constraint. Essa mesma troca aparece no projeto
-oficial e é o tipo de decisão que precisa estar escrita, senão parece esquecimento.
+mensagem de erro decente em vez de uma violação de constraint. É o tipo de decisão que precisa
+estar escrita, senão parece esquecimento.
 
 ---
 
@@ -174,9 +182,10 @@ oficial e é o tipo de decisão que precisa estar escrita, senão parece esqueci
 **Status:** Aceita
 **Issue:** #12
 
-> **Sobre a numeração:** o número D-008 está reservado à decisão de estoque, no PR #11, que ainda
-> não foi mergeado. Usar D-009 aqui evita que as duas decisões colidam no mesmo número quando os
-> dois PRs entrarem. Um buraco na sequência é inofensivo; dois D-008 diferentes, não.
+> **Sobre a numeração:** esta decisão saiu como D-009, e não D-008, porque o número D-008 estava
+> reservado à decisão de estoque, que na época ainda não tinha sido mergeada. As duas entraram, e
+> por isso a D-008 aparece **depois** desta no arquivo — a ordem cronológica de merge não é a
+> ordem numérica. Foi essa reserva que evitou dois D-008 diferentes.
 
 O campo `Cliente` da venda era texto livre. `Venda.ClienteId` passa a apontar para um cadastro de
 clientes, em `Cadastros`.
@@ -248,3 +257,100 @@ sempre esteve na camada Application.
 
 Cadastro de fornecedores (a compra continua com texto livre), importação por planilha, relatório
 por cliente, endereço, e qualquer campo fiscal.
+
+---
+
+## D-008 — O sistema passa a controlar estoque
+
+**Data:** 2026-08-12
+**Status:** Aceita
+**Supera:** [D-002](#d-002--sem-controle-de-estoque)
+
+O sistema passa a controlar o estoque dos produtos. Compras aumentam o saldo, vendas diminuem, e
+a posição é consultável.
+
+O escopo continua enxuto: entra o saldo e o histórico de movimentos, e nada além disso. Custo
+médio, valorização, depósitos e inventário seguem fora — cada um exigiria a sua própria decisão.
+
+### As sete perguntas
+
+**1. Onde o estoque mora?** → **Módulo `Estoque` próprio.**
+
+Não dentro de `Movimentos`. Custa mais — `DbContext` próprio, migration própria, comunicação por
+contrato — e é justamente por isso que foi escolhido: é o único ponto do projeto onde a
+modularidade é exercitada de verdade, com um módulo novo entrando na estrutura existente. Espelha
+o módulo `Inventory` do CeasaSystemNext.
+
+**2. Como o saldo é calculado?** → **Somando os movimentos na consulta.**
+
+Existe a tabela `MovimentosEstoque` (um registro por entrada ou saída) e **não** existe tabela de
+saldo. O saldo é `SUM(quantidade)` filtrado por produto.
+
+O CeasaSystemNext mantém uma tabela de saldo (`SaldoEstoqueFisico`) porque lá o volume justifica.
+Aqui não justifica, e a versão sem tabela de saldo tem uma vantagem que importa mais: **é
+impossível dessincronizar**. Não existe o bug clássico de "o saldo diz 40 e os movimentos dizem
+37" porque só existe uma fonte da verdade.
+
+Se um dia o volume pesar, a tabela de saldo entra como otimização — e aí é uma decisão nova, com
+o histórico já registrado.
+
+**3. Existe tabela de movimento de estoque?** → **Sim, é a única tabela.**
+
+Cada registro guarda: produto, tipo (entrada/saída), quantidade, data, e a origem (tipo do
+documento, id e número). É o que responde "por que o saldo está nesse número".
+
+**4. Excluir compra/venda estorna o saldo?** → **Sim.**
+
+Excluir o documento apaga os movimentos de estoque gerados por ele. Como o saldo é a soma dos
+movimentos, o estorno é consequência automática — não existe um "movimento de estorno" separado.
+
+Coerente com a [D-004](#d-004--sem-edição-de-compra-ou-venda-já-salva): documento não se edita, se
+exclui e refaz.
+
+**5. Venda sem saldo: bloqueia, avisa ou permite?** → **Avisa, mas permite.**
+
+A venda é gravada. A resposta da API traz um campo `avisos`, e a tela mostra a mensagem depois de
+salvar:
+
+> Estoque insuficiente: 'BAN001 — Banana Prata' tinha 70 KG e a venda usou 100 KG.
+
+O motivo é operacional: bloquear a venda por causa de um saldo que pode estar errado (lançamento
+atrasado, compra ainda não digitada) trava o faturamento por um problema de cadastro. Avisar dá a
+informação sem parar quem está vendendo.
+
+**6. Saldo negativo pode existir?** → **Sim**, é consequência direta da 5.
+
+Não é erro nem inconsistência: significa que saiu mais do que entrou **no que foi registrado**.
+A tela mostra em vermelho para chamar atenção, e o histórico permite descobrir a origem.
+
+**7. E os documentos já lançados?** → **Recalcular a partir do histórico.**
+
+A migration inicial do módulo gera os movimentos de estoque a partir das compras e vendas que já
+existem no banco. Assim o saldo nasce coerente com o que as telas já mostram, e todo desenvolvedor
+vê a mesma coisa — sem dependência de quem lançou o quê antes.
+
+### Consequência técnica: atomicidade entre dois módulos
+
+Escolher módulo próprio (pergunta 1) traz um problema que não existiria dentro de `Movimentos`:
+gravar a venda e gravar o movimento de estoque passam a ser **dois `SaveChanges`, em dois
+`DbContext` diferentes**. Sem cuidado, dá para existir venda sem a saída de estoque correspondente
+se o processo morrer no meio.
+
+**Solução:** os dois `SaveChanges` acontecem dentro de um `TransactionScope`
+(`System.Transactions`), com `TransactionScopeAsyncFlowOption.Enabled`. Como os dois `DbContext`
+apontam para o mesmo banco físico e usam a mesma string de conexão, o SQL Server trata como uma
+transação local — não escala para transação distribuída.
+
+Isto é o preço da modularidade, e está escrito para que ninguém descubra sozinho depois.
+
+### Consequência de processo: novo escopo de commit
+
+Passa a existir o escopo **`estoque`** para commits e issues. Os escopos válidos passam a ser:
+`cadastros`, `movimentos`, `estoque`, `host`, `frontend`, `ci`, `docs`, `deps`.
+
+### Fora de escopo (continua não existindo)
+
+Ajuste ou inventário manual, custo médio, valorização, depósitos, lotes, validade, reserva, e
+tratamento de concorrência entre duas vendas simultâneas do mesmo produto — esta última fica
+registrada como **limitação conhecida**: com o saldo somado na consulta e sem bloqueio, duas vendas
+ao mesmo tempo simplesmente geram dois movimentos, e o saldo reflete os dois.

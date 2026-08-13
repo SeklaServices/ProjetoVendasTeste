@@ -1,30 +1,30 @@
 # 01 — Escopo Funcional
 
-**Status:** proposta para validação
-**Versão:** 1.0
+**Versão:** 2.0
 
 ---
 
 ## 1. Objetivo do projeto
 
-Construir um sistema web de vendas **deliberadamente simples**, para que a equipe do escritório
-pratique, na prática e com um repositório real, o fluxo de trabalho de desenvolvimento:
+Sistema web de vendas **deliberadamente enxuto**: cadastro de produtos e clientes, entradas de
+compra, saídas de venda e um resumo do período.
 
-- criar branches de feature
-- abrir pull requests
-- revisar código de outra pessoa
-- resolver conflitos de merge
-- promover `develop` → `main` via release
-- corrigir produção com hotfix
+O escopo pequeno é uma **escolha de projeto**, não uma limitação. Ela produz três efeitos que
+importam:
 
-O sistema precisa ser **pequeno o suficiente para caber na cabeça** de qualquer pessoa em 15
-minutos, e **grande o suficiente para gerar PRs de verdade** — que tocam backend, frontend, banco e
-testes ao mesmo tempo.
+- **O sistema inteiro cabe na cabeça** de quem chega, em cerca de 15 minutos
+- **Todo PR é revisável de verdade**, porque nenhuma mudança precisa ser gigante
+- **Toda ausência é explicável**: o que o sistema não faz está registrado com o motivo, em
+  [07-decisoes.md](07-decisoes.md)
 
-### Critério de sucesso
+### O critério que decide o que entra
 
-Não é "o sistema funciona". É: **toda pessoa da equipe consegue, sozinha, pegar uma tarefa, criar a
-branch, implementar, abrir o PR, receber review, resolver um conflito e ver o merge acontecer.**
+Uma funcionalidade só entra se **alguém precisa dela para operar**. "Seria bom ter" não é
+justificativa suficiente — vira item de backlog em [04-roadmap.md](04-roadmap.md), com o motivo
+escrito.
+
+Quando uma decisão de escopo muda, a decisão antiga é **superada**, nunca apagada. Foi o que
+aconteceu com o controle de estoque (D-002 → D-008) e com o cliente em texto livre (D-009).
 
 ---
 
@@ -110,7 +110,28 @@ produto), Subtotal calculado.
 
 **Regras:** mesmas da compra — mínimo um item, sem edição após salvar.
 
-### 2.5 Resumo (tela inicial)
+### 2.5 Estoque
+
+Cada produto tem um **saldo**, movimentado automaticamente pelos documentos:
+
+- Uma **compra** gera uma **entrada** de estoque para cada item, na quantidade do item
+- Uma **venda** gera uma **saída**
+- **Excluir** um documento apaga os movimentos que ele gerou — o saldo volta ao que era
+
+**Não existe tabela de saldo.** O saldo é a soma dos movimentos do produto. Isso torna impossível
+o saldo divergir do histórico (ver `07-decisoes.md` D-008).
+
+**Regras:**
+- Vender mais do que o saldo disponível **é permitido**. A venda é gravada e o sistema **avisa**:
+  *"Estoque insuficiente: 'BAN001 — Banana Prata' tinha 70 KG e a venda usou 100 KG."*
+- Como consequência, **o saldo pode ficar negativo**. Não é erro: significa que saiu mais do que
+  entrou no que foi registrado. A tela mostra em vermelho.
+- Compras nunca são bloqueadas nem geram aviso.
+
+**Tela:** posição de todos os produtos com o saldo atual, busca por código ou nome, filtro
+"somente com saldo", e o histórico de movimentos de cada produto com a origem de cada um.
+
+### 2.6 Resumo (tela inicial)
 
 Painel simples, somente leitura, com:
 
@@ -120,7 +141,7 @@ Painel simples, somente leitura, com:
 - Quantidade de produtos cadastrados / ativos
 - Lista das 5 últimas compras e 5 últimas vendas
 
-Filtro por intervalo de datas. Sem gráficos na primeira versão (fica como exercício).
+Filtro por intervalo de datas. Sem gráficos — ver o backlog em `04-roadmap.md`.
 
 ---
 
@@ -130,14 +151,13 @@ Esta lista é normativa. Nada aqui entra sem uma decisão explícita registrada.
 
 | Fora de escopo | Por quê |
 |---|---|
-| **Controle de estoque** | Decisão do responsável. Não há saldo, não há validação de disponibilidade, não há movimento de estoque. Uma venda de 100 unidades de um produto que nunca foi comprado é **válida**. |
 | Cadastro de **fornecedores** | A compra continua com texto livre. O cadastro de **clientes** passou a existir (D-009). |
-| Autenticação, login, permissões | Ambiente local, sem dados reais. Vira exercício opcional. |
-| Multi-empresa / multi-filial | Complexidade do sistema real, desnecessária aqui. |
+| Autenticação, login, permissões | Não há dados sensíveis nem acesso externo. Candidato de backlog. |
+| Multi-empresa / multi-filial | Só existe uma operação. Complexidade sem demanda. |
 | Fiscal (NF-e, impostos), financeiro (contas a pagar/receber) | Fora do propósito. |
 | Edição de compra/venda já salva | Reduz escopo deliberadamente. |
-| Relatórios em PDF/Excel, impressão | Exercício futuro. |
-| Deploy em produção real | O "deploy" aqui é simbólico: merge em `main` + tag. |
+| Relatórios em PDF/Excel, impressão | Candidato de backlog. Exportar CSV vem antes. |
+| Deploy automatizado | A publicação é manual: merge em `main`, tag e release. |
 
 ---
 
@@ -154,8 +174,10 @@ Não há hierarquia, aprovação ou segregação de acesso.
 |---|---|
 | **Cliente** | Cadastro de quem compra. Código sequencial gerado pelo sistema. A venda aponta para ele. |
 | **Cliente não identificado** | Cliente genérico criado pela migration, que recebeu as vendas anteriores ao cadastro. |
-| **Compra** | Documento de entrada de mercadoria. Não afeta estoque (não existe estoque). |
-| **Venda** | Documento de saída de mercadoria. Não afeta estoque. |
+| **Compra** | Documento de entrada de mercadoria. Gera entrada de estoque. |
+| **Venda** | Documento de saída de mercadoria. Gera saída de estoque. |
+| **Movimento de estoque** | Um registro de entrada ou saída de um produto, com a origem. É a única fonte do saldo. |
+| **Saldo** | Soma dos movimentos de estoque de um produto. Calculado, nunca armazenado. |
 | **Movimento** | Termo guarda-chuva para compra ou venda. Nome do módulo que contém as duas. |
 | **Item** | Linha de um documento (compra ou venda), sempre ligada a um produto. |
 | **Subtotal** | Quantidade × preço unitário de um item. Sempre calculado, nunca digitado. |

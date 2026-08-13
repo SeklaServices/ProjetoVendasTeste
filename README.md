@@ -2,13 +2,12 @@
 
 Sistema web simples de vendas — cadastro de produtos, entradas de compra e saídas de venda.
 
-**O sistema é o pretexto.** Este repositório existe para a equipe praticar, com um projeto real e
-pequeno, o fluxo de trabalho que queremos usar no projeto oficial: issues, branches, pull requests,
-code review, resolução de conflitos, releases e hotfixes.
+O escopo é **deliberadamente enxuto**: cada funcionalidade que entra precisa se justificar, e o que
+fica de fora fica registrado com o motivo em [docs/07-decisoes.md](docs/07-decisoes.md).
 
-> **Se você nunca trabalhou com este fluxo, leia este README inteiro.** Ele foi escrito para levar
-> alguém do zero até fechar um ciclo completo de trabalho sozinho, explicando o que cada coisa
-> significa. Deve levar uns 20 minutos.
+> **Se você nunca trabalhou com este fluxo de trabalho, leia este README inteiro.** Ele foi escrito
+> para levar alguém do zero até fechar um ciclo completo de trabalho sozinho, explicando o que cada
+> coisa significa. Deve levar uns 20 minutos.
 
 ---
 
@@ -51,11 +50,12 @@ A resposta que o mercado consolidou tem quatro peças:
 3. **Um robô confere** que o código compila e os testes passam (a *CI*)
 4. **Outra pessoa lê e aprova** antes de o código virar parte do produto (o *code review*)
 
-Este repositório é onde a equipe pratica isso com um sistema de verdade, pequeno o bastante para
-caber na cabeça em 15 minutos. O que der certo aqui vai para o projeto oficial.
+Este repositório aplica as quatro. Nenhuma delas é opcional aqui, e todas são exigidas pelo próprio
+GitHub — ver [§12](#12-as-regras-que-o-github-aplica-sozinho).
 
-**Critério de sucesso:** não é "o sistema funciona". É **toda pessoa conseguir, sozinha, pegar uma
-tarefa, fazer, abrir o PR, receber crítica, resolver um conflito e ver o merge acontecer.**
+O sistema é pequeno de propósito: cabe na cabeça em 15 minutos, e isso é uma escolha de projeto,
+não uma limitação. Escopo pequeno é o que mantém o código legível, o review possível e as decisões
+rastreáveis.
 
 ---
 
@@ -166,14 +166,21 @@ está publicado, e para conseguir voltar a ele.
 | **Clientes** | Cadastro com código sequencial, nome, CPF/CNPJ, telefone e e-mail |
 | **Compras** | Entrada de mercadoria — cabeçalho (data, fornecedor) + itens (produto, quantidade, preço) |
 | **Vendas** | Saída de mercadoria — mesma estrutura, com cliente selecionado do cadastro |
+| **Estoque** | Saldo por produto, movimentado pelas compras e vendas, com histórico de cada movimento |
 | **Resumo** | Totais de compras e vendas no período, e as últimas movimentações |
 
-**O que ele deliberadamente NÃO faz:** controle de estoque, cadastro de fornecedores (a compra usa
-texto livre), login, fiscal, financeiro, edição de documento já salvo.
+**O que ele deliberadamente NÃO faz:** cadastro de fornecedores (a compra usa texto livre), login,
+fiscal, financeiro, edição de documento já salvo.
 
 Isso não é esquecimento — é decisão registrada em [docs/07-decisoes.md](docs/07-decisoes.md).
-**Vender 100 unidades de um produto que nunca foi comprado é válido neste sistema**, porque não
-existe estoque. Se um dia mudar, a decisão antiga é *superada*, não apagada.
+**Vender mais do que o saldo disponível é permitido**: o sistema grava a venda e avisa, em vez de
+bloquear (D-008, pergunta 5). Como consequência, o saldo pode ficar negativo — e isso também não
+é bug.
+
+> O sistema **não tinha** estoque até 2026-08-12, por decisão registrada (D-002). Quando isso
+> mudou, a decisão antiga não foi apagada: foi marcada como **superada** pela D-008, com o motivo.
+> Esse é o padrão do projeto — o histórico precisa explicar tanto o que valia antes quanto por que
+> mudou.
 
 ### Stack
 
@@ -184,7 +191,7 @@ existe estoque. Se um dia mudar, a decisão antiga é *superada*, não apagada.
 | Frontend | React 19 + TypeScript strict + Vite + Ant Design 6 + TanStack Query + Axios |
 | CI | GitHub Actions |
 
-É a mesma stack do projeto oficial, em escala reduzida.
+Mesma stack dos demais sistemas do escritório.
 
 ---
 
@@ -409,7 +416,7 @@ Formato obrigatório:
 ```
 
 **Tipos:** `feat` `fix` `test` `docs` `refactor` `chore` `ci` `perf`
-**Escopos:** `cadastros` `movimentos` `host` `frontend` `ci` `docs` `deps`
+**Escopos:** `cadastros` `movimentos` `estoque` `host` `frontend` `ci` `docs` `deps`
 
 ```
 feat(cadastros): adiciona validacao de codigo duplicado no produto
@@ -441,10 +448,25 @@ não couber, quebre em dois (backend primeiro, frontend depois, por exemplo).
 
 ## Merge
 
+> ### ⚠️ A regra que mais dá problema
+>
+> | De | Para | Botão |
+> |---|---|---|
+> | `feature/*`, `fix/*` | `develop` | **Squash and merge** |
+> | `release/*`, `hotfix/*` | `main` | **Create a merge commit** |
+> | `main` de volta para `develop` | `develop` | **Create a merge commit** |
+>
+> **Squash na `main` quebra o repositório.** Não é exagero: squash joga fora a ligação com a branch
+> de origem e cria um commit novo do zero. `main` e `develop` ficam com o mesmo conteúdo e histórias
+> separadas — e a partir daí todo release acusa conflito em arquivos idênticos.
+>
+> O ruleset da `main` foi configurado para **não oferecer o botão de squash**. Se ele aparecer aí,
+> a configuração se perdeu — avise alguém.
+
 | De → para | Estratégia | Por quê |
 |---|---|---|
 | `feature/*`, `fix/*` → `develop` | **Squash and merge** | Os commits da branch viram um só. O histórico da `develop` fica com um commit por funcionalidade |
-| `release/*`, `hotfix/*` → `main` | **Merge commit** | Preserva o histórico e deixa explícito no grafo que houve uma publicação |
+| `release/*`, `hotfix/*` → `main` | **Merge commit** | Preserva a ligação entre as branches. É o que impede o problema descrito acima |
 
 Depois do merge, a branch é deletada — o GitHub oferece o botão.
 
@@ -751,9 +773,9 @@ Prefere não usar linha de comando? O mesmo fluxo por botões está em
 | 1 | [docs/01-escopo-funcional.md](docs/01-escopo-funcional.md) | O que o sistema faz e o que não faz |
 | 2 | [docs/02-arquitetura.md](docs/02-arquitetura.md) | Camadas, pastas, modelo de dados, contratos de API |
 | 3 | [docs/03-fluxo-git.md](docs/03-fluxo-git.md) | O fluxo em detalhe, com todos os comandos |
-| 4 | [docs/04-plano-de-desenvolvimento.md](docs/04-plano-de-desenvolvimento.md) | Os PRs que compõem a v1.0.0 |
+| — | [CHANGELOG.md](CHANGELOG.md) | O que mudou em cada versão publicada |
+| 4 | [docs/04-roadmap.md](docs/04-roadmap.md) | O que já foi entregue e o que vem a seguir |
 | 5 | [docs/05-setup.md](docs/05-setup.md) | Setup em detalhe |
-| 6 | [docs/06-exercicios-git.md](docs/06-exercicios-git.md) | 11 exercícios práticos, em 4 níveis |
 | 7 | [docs/07-decisoes.md](docs/07-decisoes.md) | Decisões tomadas e o porquê de cada uma |
 | 8 | [docs/08-protecao-do-repositorio.md](docs/08-protecao-do-repositorio.md) | Como o GitHub aplica as regras sozinho |
 | 9 | [docs/09-fluxo-sem-linha-de-comando.md](docs/09-fluxo-sem-linha-de-comando.md) | O mesmo fluxo, por botões |
