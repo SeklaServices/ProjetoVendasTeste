@@ -1,16 +1,15 @@
 # 02 — Arquitetura
 
-**Status:** proposta para validação
-**Versão:** 1.0
+**Versão:** 2.0
 
-Este documento define a arquitetura do ProjetoVendasTeste. Ela é uma **versão reduzida e fiel** da
-arquitetura do `CeasaSystemNext`, para que a prática de git aqui se pareça com o trabalho real lá.
+Este documento define a arquitetura do ProjetoVendasTeste. Ela segue os mesmos padrões do
+`CeasaSystemNext`, em escala menor.
 
 ---
 
 ## 1. Princípio: espelhar o real, em escala pequena
 
-| CeasaSystemNext (real) | ProjetoVendasTeste (treino) |
+| CeasaSystemNext | ProjetoVendasTeste |
 |---|---|
 | .NET 10, Minimal API, sem Controllers | ✅ Igual |
 | Clean Architecture por módulo (Domain/Application/Infrastructure/Api) | ✅ Igual |

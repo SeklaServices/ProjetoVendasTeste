@@ -1,10 +1,9 @@
 # 03 — Fluxo de Trabalho com Git e GitHub
 
-**Status:** proposta para validação
-**Versão:** 1.0
+**Versão:** 2.0
 
-> Este é o documento mais importante do projeto. O sistema de vendas existe para dar matéria-prima
-> a este fluxo.
+> Como o trabalho entra no sistema: da issue ao merge. Nada entra por push direto — e isso é
+> aplicado pelo servidor, não combinado (ver [08-protecao-do-repositorio.md](08-protecao-do-repositorio.md)).
 
 ---
 
@@ -138,7 +137,7 @@ que você digitou. `feat(cadastros): adiciona validacao de codigo duplicado` é 
 
 Alvo: **até ~400 linhas alteradas**. PR maior que isso não é revisado — é carimbado. Se sua tarefa
 não cabe, quebre em dois PRs (ex.: backend primeiro, frontend depois — foi assim que o plano em
-`04-plano-de-desenvolvimento.md` foi montado).
+`04-roadmap.md` está organizado).
 
 ### Estratégia de merge
 
@@ -281,7 +280,7 @@ A fazer na criação do repositório (checklist de setup):
 - [ ] Issues habilitadas — toda branch nasce de uma
 
 > Com apenas 1 aprovação obrigatória e poucos desenvolvedores, o GitHub **não** deixa o autor
-> aprovar o próprio PR. Isso é intencional e é parte do exercício.
+> aprovar o próprio PR. Isso é intencional.
 
 ---
 

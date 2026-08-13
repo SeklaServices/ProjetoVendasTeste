@@ -1,7 +1,6 @@
 # 05 — Setup do Ambiente
 
-**Status:** proposta para validação
-**Versão:** 1.0
+**Versão:** 2.0
 
 ---
 
@@ -82,9 +81,9 @@ Get-Service | Where-Object { $_.Name -like 'MSSQL*' } | Select-Object Name, Stat
 | `MSSQLSERVER` | `localhost` |
 | LocalDB (não aparece como serviço) | `(localdb)\MSSQLLocalDB` |
 
-> **Por que isso importa para o treino de git:** configuração local nunca vai para o repositório.
+> **Por que isso importa:** configuração local nunca vai para o repositório.
 > Se alguém commitar `appsettings.Development.json` com a conexão da própria máquina, o PR quebra
-> para todo mundo. É o exemplo mais didático de "por que existe `.gitignore`".
+> para todo mundo.
 
 ### 3.2 Criar o banco
 
