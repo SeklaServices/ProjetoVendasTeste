@@ -773,6 +773,7 @@ Prefere não usar linha de comando? O mesmo fluxo por botões está em
 | 1 | [docs/01-escopo-funcional.md](docs/01-escopo-funcional.md) | O que o sistema faz e o que não faz |
 | 2 | [docs/02-arquitetura.md](docs/02-arquitetura.md) | Camadas, pastas, modelo de dados, contratos de API |
 | 3 | [docs/03-fluxo-git.md](docs/03-fluxo-git.md) | O fluxo em detalhe, com todos os comandos |
+| — | [CHANGELOG.md](CHANGELOG.md) | O que mudou em cada versão publicada |
 | 4 | [docs/04-roadmap.md](docs/04-roadmap.md) | O que já foi entregue e o que vem a seguir |
 | 5 | [docs/05-setup.md](docs/05-setup.md) | Setup em detalhe |
 | 7 | [docs/07-decisoes.md](docs/07-decisoes.md) | Decisões tomadas e o porquê de cada uma |

@@ -2,6 +2,12 @@
 
   <!-- Configuração comum a todos os projetos do backend. Evita repetir o mesmo bloco em 12 csproj
        e garante que ninguém "esqueça" de ligar o nullable num projeto novo. -->
+  <!-- Versão de todos os assemblies. Atualizada na branch de release, junto com o CHANGELOG,
+       e refletida na tag do git. -->
+  <PropertyGroup>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
