@@ -31,8 +31,8 @@ segue [SemVer](https://semver.org/lang/pt-BR/).
 
   **Como migrar:** cadastre o cliente em `POST /api/v1/clientes`, guarde o `id` devolvido e use-o
   como `clienteId` ao lançar a venda. Cliente inexistente ou inativo é recusado com `422`
-- **Documentação** reescrita para descrever o sistema pelo que ele é, sem o enquadramento de
-  projeto de treino que existia até aqui (PR #20)
+- **Documentação** reescrita para descrever o sistema pelo que ele é: escopo enxuto justificado por
+  legibilidade, revisabilidade e rastreabilidade das decisões (PR #20)
 
 ### Decisões registradas
 

@@ -472,6 +472,11 @@ Depois do merge, a branch é deletada — o GitHub oferece o botão.
 
 ## Release e hotfix
 
+> **⚠️ Ao publicar a Release pela interface do GitHub, troque o campo `Target` para `main`.** Ele
+> vem preenchido com a branch padrão (`develop`), e a tag acabaria apontando para um commit que
+> ainda não tem o `CHANGELOG.md` nem a versão nova. Detalhe em
+> [docs/03-fluxo-git.md](docs/03-fluxo-git.md) §6.
+
 **Release** — quando a `develop` acumula um conjunto que faz sentido publicar: branch
 `release/1.0.0` a partir da `develop`, CHANGELOG, PR para `main` com merge commit, tag `v1.0.0`, e
 **merge de volta em `develop`**.

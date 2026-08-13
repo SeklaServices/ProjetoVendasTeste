@@ -217,7 +217,26 @@ git push origin v1.0.0
 git switch develop; git merge main; git push
 ```
 
-Versionamento: **SemVer** — `MAJOR.MINOR.PATCH`.
+Versionamento: **SemVer** — `MAJOR.MINOR.PATCH`. Quebra de contrato de API é `MAJOR`, mesmo que o
+único consumidor seja o frontend deste repositório.
+
+### ⚠️ A tag e a Release saem da `main`, nunca da `develop`
+
+Ao criar a Release pela interface do GitHub, o campo **Target** vem preenchido com a **branch
+padrão** — que neste repositório é a `develop`. **Troque para `main`.**
+
+Se não trocar, a tag aponta para o último commit da `develop`, que ainda **não tem** o
+`CHANGELOG.md` nem a versão nova. O resultado é uma versão publicada que não contém o que a versão
+diz conter — já aconteceu duas vezes aqui.
+
+Conferir depois de criar:
+
+```powershell
+git fetch origin --tags
+git show -s --format="%H %s" v2.0.0
+```
+
+O commit precisa ser o **merge do PR de release na `main`**, não o último commit da `develop`.
 
 ---
 
