@@ -449,10 +449,25 @@ não couber, quebre em dois (backend primeiro, frontend depois, por exemplo).
 
 ## Merge
 
+> ### ⚠️ A regra que mais dá problema
+>
+> | De | Para | Botão |
+> |---|---|---|
+> | `feature/*`, `fix/*` | `develop` | **Squash and merge** |
+> | `release/*`, `hotfix/*` | `main` | **Create a merge commit** |
+> | `main` de volta para `develop` | `develop` | **Create a merge commit** |
+>
+> **Squash na `main` quebra o repositório.** Não é exagero: squash joga fora a ligação com a branch
+> de origem e cria um commit novo do zero. `main` e `develop` ficam com o mesmo conteúdo e histórias
+> separadas — e a partir daí todo release acusa conflito em arquivos idênticos.
+>
+> O ruleset da `main` foi configurado para **não oferecer o botão de squash**. Se ele aparecer aí,
+> a configuração se perdeu — avise alguém.
+
 | De → para | Estratégia | Por quê |
 |---|---|---|
 | `feature/*`, `fix/*` → `develop` | **Squash and merge** | Os commits da branch viram um só. O histórico da `develop` fica com um commit por funcionalidade |
-| `release/*`, `hotfix/*` → `main` | **Merge commit** | Preserva o histórico e deixa explícito no grafo que houve uma publicação |
+| `release/*`, `hotfix/*` → `main` | **Merge commit** | Preserva a ligação entre as branches. É o que impede o problema descrito acima |
 
 Depois do merge, a branch é deletada — o GitHub oferece o botão.
 
