@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Compartilhado/">
+    <Project Path="src/Compartilhado/Vendas.Shared/Vendas.Shared.csproj" />
+  </Folder>
+  <Folder Name="/src/Host/">
+    <Project Path="src/Host/Vendas.Host/Vendas.Host.csproj" />
+  </Folder>
+  <Folder Name="/src/Modulos/" />
+  <Folder Name="/src/Modulos/Cadastros/">
+    <Project Path="src/Modulos/Cadastros/Vendas.Cadastros.Api/Vendas.Cadastros.Api.csproj" />
+    <Project Path="src/Modulos/Cadastros/Vendas.Cadastros.Application/Vendas.Cadastros.Application.csproj" />
+    <Project Path="src/Modulos/Cadastros/Vendas.Cadastros.Domain/Vendas.Cadastros.Domain.csproj" />
+    <Project Path="src/Modulos/Cadastros/Vendas.Cadastros.Infrastructure/Vendas.Cadastros.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modulos/Movimentos/">
+    <Project Path="src/Modulos/Movimentos/Vendas.Movimentos.Api/Vendas.Movimentos.Api.csproj" />
+    <Project Path="src/Modulos/Movimentos/Vendas.Movimentos.Application/Vendas.Movimentos.Application.csproj" />
+    <Project Path="src/Modulos/Movimentos/Vendas.Movimentos.Domain/Vendas.Movimentos.Domain.csproj" />
+    <Project Path="src/Modulos/Movimentos/Vendas.Movimentos.Infrastructure/Vendas.Movimentos.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/testes/">
+    <Project Path="testes/Vendas.Cadastros.Tests.Unit/Vendas.Cadastros.Tests.Unit.csproj" />
+    <Project Path="testes/Vendas.Movimentos.Tests.Unit/Vendas.Movimentos.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

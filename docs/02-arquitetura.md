@@ -117,7 +117,7 @@ public sealed class CriarProdutoCommandHandler(IProdutoRepositorio repositorio)
 
 ## 4. Modelo de dados
 
-Quatro tabelas. Sem tabela de estoque — por decisão de escopo.
+Cinco tabelas. Sem tabela de estoque — por decisão de escopo.
 
 ```
 Produtos
@@ -130,11 +130,21 @@ Produtos
   Ativo             bit
   DataCadastro      datetime2
 
+Clientes
+  Id                uniqueidentifier  PK
+  Codigo            int               UNIQUE (sequence SeqCliente) — gerado, não digitado
+  Nome              nvarchar(120)
+  Documento         nvarchar(18)      NULL, UNIQUE filtrado (WHERE Documento IS NOT NULL)
+  Telefone          nvarchar(20)      NULL
+  Email             nvarchar(120)     NULL
+  Ativo             bit
+  DataCadastro      datetime2
+
 Compras                              Vendas
-  Id       uniqueidentifier PK         Id       uniqueidentifier PK
-  Numero   int UNIQUE (sequence)       Numero   int UNIQUE (sequence)
-  Data     date                        Data     date
-  Fornecedor nvarchar(120)             Cliente  nvarchar(120)
+  Id       uniqueidentifier PK         Id        uniqueidentifier PK
+  Numero   int UNIQUE (sequence)       Numero    int UNIQUE (sequence)
+  Data     date                        Data      date
+  Fornecedor nvarchar(120)             ClienteId uniqueidentifier (indexado, sem FK)
   Observacao nvarchar(500) NULL        Observacao nvarchar(500) NULL
   ValorTotal decimal(18,4)             ValorTotal decimal(18,4)
   DataCriacao datetime2                DataCriacao datetime2
@@ -142,7 +152,7 @@ Compras                              Vendas
 ComprasItens                         VendasItens
   Id            uniqueidentifier PK    Id            uniqueidentifier PK
   CompraId      FK → Compras (cascade) VendaId       FK → Vendas (cascade)
-  ProdutoId     FK → Produtos (restrict) ProdutoId   FK → Produtos (restrict)
+  ProdutoId     indexado (sem FK)      ProdutoId     indexado (sem FK)
   Quantidade    decimal(18,4)          Quantidade    decimal(18,4)
   PrecoUnitario decimal(18,4)          PrecoUnitario decimal(18,4)
   Subtotal      decimal(18,4)          Subtotal      decimal(18,4)
@@ -151,8 +161,11 @@ ComprasItens                         VendasItens
 **Decisões:**
 - `Id` é `Guid` (gerado na aplicação) — igual ao projeto real.
 - `Numero` vem de uma `SEQUENCE` do SQL Server (`SeqCompra`, `SeqVenda`) — igual ao projeto real.
-- FK de item → produto é `RESTRICT`: é isso que impede excluir produto já usado.
 - FK de item → documento é `CASCADE`: excluir a compra apaga seus itens.
+- Item → produto **não tem FK**, só índice em `ProdutoId`. `Produtos` pertence ao DbContext de
+  outro módulo, e uma FK entre migrations de módulos diferentes as tornaria dependentes uma da
+  outra. A integridade fica na camada Application (`ExcluirProdutoCommandHandler` e a validação
+  dos itens). Ver `07-decisoes.md` D-007.
 - `ValorTotal` e `Subtotal` são **persistidos**, mas sempre calculados pelo domínio. A API rejeita
   qualquer valor enviado pelo cliente para esses campos.
 
@@ -172,6 +185,18 @@ tipo de decisão que gera boa discussão em code review.
 ## 5. Contratos de API
 
 Base: `/api/v1`. Formato de erro padronizado: `{ "codigo": "...", "mensagem": "..." }`.
+
+### Clientes
+
+| Método | Rota | Retorno |
+|---|---|---|
+| `GET` | `/clientes?busca=&apenasAtivos=` | `200` lista de clientes |
+| `GET` | `/clientes/{id}` | `200` cliente \| `404` |
+| `POST` | `/clientes` | `201` + `{ id }` \| `422` |
+| `PUT` | `/clientes/{id}` | `204` \| `404` \| `422` |
+| `DELETE` | `/clientes/{id}` | `204` \| `422` (cliente com vendas) |
+
+A busca aceita código, nome ou documento. O `codigo` nunca vem no corpo — é gerado pelo banco.
 
 ### Produtos
 
@@ -194,7 +219,10 @@ Base: `/api/v1`. Formato de erro padronizado: `{ "codigo": "...", "mensagem": ".
 
 ### Vendas
 
-Idêntico a compras, trocando `/compras` por `/vendas` e `fornecedor` por `cliente`.
+Mesmas rotas de compras, trocando `/compras` por `/vendas`. A diferença está no parceiro: a compra
+recebe `fornecedor` (texto livre) e a venda recebe **`clienteId`** (id do cadastro). As respostas da
+venda trazem `clienteId`, `clienteCodigo` e `clienteNome` — o nome é resolvido do cadastro a cada
+consulta, porque a venda guarda só o id (D-009).
 
 ### Resumo
 
@@ -232,6 +260,7 @@ Idêntico a compras, trocando `/compras` por `/vendas` e `fornecedor` por `clien
 |---|---|---|
 | `/` | Resumo | Cards de totais + últimas movimentações |
 | `/produtos` | Produtos | `Table` com busca + `Modal` de cadastro/edição |
+| `/clientes` | Clientes | `Table` com busca (código, nome ou documento) + `Modal` de cadastro/edição |
 | `/compras` | Compras | `Table` com filtro de data + `Modal` de lançamento (cabeçalho + grid de itens) |
 | `/compras/:id` | Detalhe da compra | Somente leitura |
 | `/vendas` | Vendas | Igual a compras |

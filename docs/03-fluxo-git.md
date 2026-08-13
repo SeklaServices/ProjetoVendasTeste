@@ -38,7 +38,7 @@ rastreabilidade: da issue → branch → commits → PR → merge → tag.
 
 1. **Nunca** `git push` direto em `main` ou `develop`. (Branch protection vai bloquear de qualquer
    forma — mas a regra existe antes da ferramenta.)
-2. Feature nasce de `develop` **atualizada**: `git switch develop && git pull` antes de criar.
+2. Feature nasce de `develop` **atualizada**: `git switch develop; git pull` antes de criar.
 3. Uma branch = uma tarefa. Branch que faz duas coisas gera PR que ninguém revisa direito.
 4. Branch de feature vive **poucos dias**. Branch de duas semanas é conflito garantido.
 5. `--force` só em branch de feature **sua**, nunca em branch compartilhada.
@@ -205,17 +205,17 @@ outro jeito porque X" — as duas são respostas válidas. Silêncio não é.
 Quando `develop` acumula um conjunto de features que faz sentido publicar:
 
 ```bash
-git switch develop && git pull
+git switch develop; git pull
 git switch -c release/1.0.0
 # ajustes finais de versão, CHANGELOG — nada de feature nova aqui
 git push -u origin release/1.0.0
 gh pr create --base main --title "release: 1.0.0"
 # após merge (merge commit, não squash):
-git switch main && git pull
+git switch main; git pull
 git tag -a v1.0.0 -m "Release 1.0.0 — produtos, compras e vendas"
 git push origin v1.0.0
 # devolver os ajustes da release para develop:
-git switch develop && git merge main && git push
+git switch develop; git merge main; git push
 ```
 
 Versionamento: **SemVer** — `MAJOR.MINOR.PATCH`.
@@ -227,13 +227,13 @@ Versionamento: **SemVer** — `MAJOR.MINOR.PATCH`.
 Bug em `main` que não pode esperar a próxima release:
 
 ```bash
-git switch main && git pull
+git switch main; git pull
 git switch -c hotfix/31-total-negativo
 # corrigir + teste que reproduz o bug
 git push -u origin hotfix/31-total-negativo
 gh pr create --base main --fill
 # após merge em main: taguear v1.0.1 e trazer para develop
-git switch develop && git merge main && git push
+git switch develop; git merge main; git push
 ```
 
 **A parte que sempre esquecem:** o hotfix precisa voltar para `develop`. Senão o bug volta na
