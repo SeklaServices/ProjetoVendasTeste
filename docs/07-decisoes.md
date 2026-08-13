@@ -77,7 +77,10 @@ tabela — ele seria um ambiente sem branch correspondente.
 ## D-002 — Sem controle de estoque
 
 **Data:** 2026-08-12
-**Status:** Aceita
+**Status:** ⚠️ **Superada pela [D-008](#d-008--o-sistema-passa-a-controlar-estoque) em 2026-08-12**
+
+> O texto abaixo é o original, mantido intacto. Decisão registrada não se apaga — se supera. Quem
+> ler o histórico daqui a um ano precisa entender tanto o que valia antes quanto por que mudou.
 
 Decisão do responsável. O objetivo do projeto é treinar o fluxo de trabalho, não modelar um ERP.
 Estoque traria saldo, validação de disponibilidade, custo médio e concorrência — tudo relevante no
@@ -174,9 +177,10 @@ oficial e é o tipo de decisão que precisa estar escrita, senão parece esqueci
 **Status:** Aceita
 **Issue:** #12
 
-> **Sobre a numeração:** o número D-008 está reservado à decisão de estoque, no PR #11, que ainda
-> não foi mergeado. Usar D-009 aqui evita que as duas decisões colidam no mesmo número quando os
-> dois PRs entrarem. Um buraco na sequência é inofensivo; dois D-008 diferentes, não.
+> **Sobre a numeração:** esta decisão saiu como D-009, e não D-008, porque o número D-008 estava
+> reservado à decisão de estoque, que na época ainda não tinha sido mergeada. As duas entraram, e
+> por isso a D-008 aparece **depois** desta no arquivo — a ordem cronológica de merge não é a
+> ordem numérica. Foi essa reserva que evitou dois D-008 diferentes.
 
 O campo `Cliente` da venda era texto livre. `Venda.ClienteId` passa a apontar para um cadastro de
 clientes, em `Cadastros`.
@@ -248,3 +252,100 @@ sempre esteve na camada Application.
 
 Cadastro de fornecedores (a compra continua com texto livre), importação por planilha, relatório
 por cliente, endereço, e qualquer campo fiscal.
+
+---
+
+## D-008 — O sistema passa a controlar estoque
+
+**Data:** 2026-08-12
+**Status:** Aceita
+**Supera:** [D-002](#d-002--sem-controle-de-estoque)
+
+O sistema passa a controlar o estoque dos produtos. Compras aumentam o saldo, vendas diminuem, e
+a posição é consultável.
+
+O projeto continua sendo, antes de tudo, um campo de treino do fluxo de trabalho. O estoque entra
+porque dá material de trabalho realista para a equipe — não porque o objetivo mudou.
+
+### As sete perguntas
+
+**1. Onde o estoque mora?** → **Módulo `Estoque` próprio.**
+
+Não dentro de `Movimentos`. Custa mais — `DbContext` próprio, migration própria, comunicação por
+contrato — e é justamente por isso que foi escolhido: é o único ponto do projeto onde a
+modularidade é exercitada de verdade, com um módulo novo entrando na estrutura existente. Espelha
+o módulo `Inventory` do CeasaSystemNext.
+
+**2. Como o saldo é calculado?** → **Somando os movimentos na consulta.**
+
+Existe a tabela `MovimentosEstoque` (um registro por entrada ou saída) e **não** existe tabela de
+saldo. O saldo é `SUM(quantidade)` filtrado por produto.
+
+O CeasaSystemNext mantém uma tabela de saldo (`SaldoEstoqueFisico`) porque lá o volume justifica.
+Aqui não justifica, e a versão sem tabela de saldo tem uma vantagem que importa mais: **é
+impossível dessincronizar**. Não existe o bug clássico de "o saldo diz 40 e os movimentos dizem
+37" porque só existe uma fonte da verdade.
+
+Se um dia o volume pesar, a tabela de saldo entra como otimização — e aí é uma decisão nova, com
+o histórico já registrado.
+
+**3. Existe tabela de movimento de estoque?** → **Sim, é a única tabela.**
+
+Cada registro guarda: produto, tipo (entrada/saída), quantidade, data, e a origem (tipo do
+documento, id e número). É o que responde "por que o saldo está nesse número".
+
+**4. Excluir compra/venda estorna o saldo?** → **Sim.**
+
+Excluir o documento apaga os movimentos de estoque gerados por ele. Como o saldo é a soma dos
+movimentos, o estorno é consequência automática — não existe um "movimento de estorno" separado.
+
+Coerente com a [D-004](#d-004--sem-edição-de-compra-ou-venda-já-salva): documento não se edita, se
+exclui e refaz.
+
+**5. Venda sem saldo: bloqueia, avisa ou permite?** → **Avisa, mas permite.**
+
+A venda é gravada. A resposta da API traz um campo `avisos`, e a tela mostra a mensagem depois de
+salvar:
+
+> Estoque insuficiente: 'BAN001 — Banana Prata' tinha 70 KG e a venda usou 100 KG.
+
+O motivo é operacional: bloquear a venda por causa de um saldo que pode estar errado (lançamento
+atrasado, compra ainda não digitada) trava o faturamento por um problema de cadastro. Avisar dá a
+informação sem parar quem está vendendo.
+
+**6. Saldo negativo pode existir?** → **Sim**, é consequência direta da 5.
+
+Não é erro nem inconsistência: significa que saiu mais do que entrou **no que foi registrado**.
+A tela mostra em vermelho para chamar atenção, e o histórico permite descobrir a origem.
+
+**7. E os documentos já lançados?** → **Recalcular a partir do histórico.**
+
+A migration inicial do módulo gera os movimentos de estoque a partir das compras e vendas que já
+existem no banco. Assim o saldo nasce coerente com o que as telas já mostram, e todo desenvolvedor
+vê a mesma coisa — sem dependência de quem lançou o quê antes.
+
+### Consequência técnica: atomicidade entre dois módulos
+
+Escolher módulo próprio (pergunta 1) traz um problema que não existiria dentro de `Movimentos`:
+gravar a venda e gravar o movimento de estoque passam a ser **dois `SaveChanges`, em dois
+`DbContext` diferentes**. Sem cuidado, dá para existir venda sem a saída de estoque correspondente
+se o processo morrer no meio.
+
+**Solução:** os dois `SaveChanges` acontecem dentro de um `TransactionScope`
+(`System.Transactions`), com `TransactionScopeAsyncFlowOption.Enabled`. Como os dois `DbContext`
+apontam para o mesmo banco físico e usam a mesma string de conexão, o SQL Server trata como uma
+transação local — não escala para transação distribuída.
+
+Isto é o preço da modularidade, e está escrito para que ninguém descubra sozinho depois.
+
+### Consequência de processo: novo escopo de commit
+
+Passa a existir o escopo **`estoque`** para commits e issues. Os escopos válidos passam a ser:
+`cadastros`, `movimentos`, `estoque`, `host`, `frontend`, `ci`, `docs`, `deps`.
+
+### Fora de escopo (continua não existindo)
+
+Ajuste ou inventário manual, custo médio, valorização, depósitos, lotes, validade, reserva, e
+tratamento de concorrência entre duas vendas simultâneas do mesmo produto — esta última fica
+registrada como **limitação conhecida**: com o saldo somado na consulta e sem bloqueio, duas vendas
+ao mesmo tempo simplesmente geram dois movimentos, e o saldo reflete os dois.

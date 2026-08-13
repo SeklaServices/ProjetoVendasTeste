@@ -49,6 +49,7 @@ body:
       options:
         - cadastros
         - movimentos
+        - estoque
         - host
         - frontend
         - ci
